@@ -1,0 +1,21 @@
+# Sistema operativo
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# Node.js (si lo usas)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Otros
+.env
+.env.local
+*.log
